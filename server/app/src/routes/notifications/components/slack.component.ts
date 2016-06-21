@@ -1,0 +1,93 @@
+import { Component, Input, ViewChild, OnInit } from '@angular/core';
+
+import { MessageService } from '../../../services/index';
+
+import { SlackService } from '../services/slack.service';
+import { SlackModel }   from '../models/slack.model';
+
+
+@Component({
+  moduleId: module.id,
+  selector: 'slack',
+  templateUrl: 'slack.component.html',
+  providers: [SlackService]
+})
+export class SlackComponent implements OnInit {
+
+  model: SlackModel;
+  storedWebhookURL: string;
+  dirty: boolean;
+
+  @ViewChild('input') input;
+  formActive: boolean = true;
+
+  saving: boolean = false;
+  errorMessage: string;
+
+  constructor(
+    private slackService: SlackService,
+    private messageService: MessageService
+  ) {}
+
+  ngOnInit() {
+    this.slackService.load()
+      .subscribe(
+        model => {
+          this.model = model;
+          this.storedWebhookURL = model.settings.webhookURL;
+        },
+        err => this.messageService.error(err)
+      );
+  }
+
+  inputChanged() {
+    this.dirty = this.model.settings.webhookURL !== this.storedWebhookURL;
+
+    if (!this.dirty) {
+      this.formActive = false;
+      setTimeout(() => {
+        this.formActive = true;
+        setTimeout(() => {
+          this.input.nativeElement.focus();
+        }, 0);
+      }, 0);
+    }
+  }
+
+  onSubmit() {
+    this.saving = true;
+    const enabled = this.model.enabled;
+    this.model.enabled = true;
+
+    this.slackService.save(this.model)
+      .subscribe(
+        () => {
+          this.storedWebhookURL = this.model.settings.webhookURL;
+          this.saving = false;
+          this.errorMessage = null;
+        },
+        (err) => {
+          this.model.enabled = enabled;
+          this.saving = false;
+          this.errorMessage = `${err.status} ${err.text()}`;
+        }
+      );
+  }
+
+  toggleEnabled() {
+    this.saving = true;
+
+    this.slackService.update({enabled: !this.model.enabled})
+      .subscribe(
+        () => {
+          this.model.enabled = !this.model.enabled;
+          this.saving = false;
+          this.errorMessage = null;
+        },
+        (err) => {
+          this.saving = false;
+          this.errorMessage = `${err.status} ${err.text()}`
+        }
+      );
+  }
+}

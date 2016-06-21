@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <base href="{{.CanonicalURL}}">
+
+    <title>Welcome to SteemWatch</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Social -->
+    <link href="/assets/css/font-awesome.css" rel="stylesheet">
+    <link href="/assets/css/bootstrap-social.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="/assets/css/doc.css" rel="stylesheet">
+
+    <!-- Context -->
+    <script>
+      var ctx = {
+        canonicalURL: '{{.CanonicalURL}}',
+        user: {
+          id: '{{.UserId}}',
+          email: '{{.UserEmail}}'
+        }
+      };
+
+      console.log('Context:', ctx);
+    </script>
+
+    <!-- 1. Load libraries -->
+    <!-- Polyfill(s) for older browsers -->
+    <script src="/modules/core-js/client/shim.min.js"></script>
+    <script src="/modules/zone.js/dist/zone.js"></script>
+    <script src="/modules/reflect-metadata/Reflect.js"></script>
+    <script src="/modules/systemjs/dist/system.src.js"></script>
+    <!-- 2. Configure SystemJS -->
+    <script src="/app/systemjs.config.js"></script>
+    <script>
+      System.import('app').catch(function(err){ console.error(err); });
+    </script>
+
+  </head>
+  <!-- 3. Display the application -->
+  <body>
+
+    <app>
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">SteemWatch <span class="version">Alpha</span></a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="container">
+        <div class="content center">
+            <p class="lead">SteemWatch is loading ...</p>
+            <img src="/assets/img/loading.gif" />
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="container">
+          <p class="text-muted">
+            <a href="https://steemit.com/@void" target="_blank">@void</a>
+            &nbsp;&nbsp;&nbsp;
+            <a href="https://steemit.com/created/steemwatch" target="_blank">#steemwatch</a>
+          </p>
+        </div>
+      </div>
+    </app>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="/assets/bootstrap/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="/assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>

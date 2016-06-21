@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <base href="{{.CanonicalURL}}">
+
+    <title>Welcome to SteemWatch</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Social -->
+    <link href="/assets/css/font-awesome.css" rel="stylesheet">
+    <link href="/assets/css/bootstrap-social.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="/assets/css/doc.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">SteemWatch <span class="version">Alpha</span></a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="content center">
+        <h1>Welcome to SteemWatch</h1>
+        <p class="lead">
+          Hear my words and bear witness to my vow. Steem grows, and now my
+          watch begins.
+        </p>
+        <p class="intro">
+          SteemWatch is the notification center for
+          <a href="https://steem.io" target="_blank">Steem</a>
+          you have always dreamed about. It lets you pick Steem events
+          you are interested in and then dispatch notifications using some of
+          the notification mechanisms available. No longer you need to keep
+          reloading Steemit.com. Just get notified automatically when the
+          content you are interested in appears, you story gets upvoted and more!
+        </p>
+        <p>
+          You can sign into SteemWatch using one of the following providers.
+          SteemWatch is only going to read and remember your email address,
+          nothing else. Please note that every account is bound to an email
+          address, so in case you decide to use multiple login providers and
+          your email address differs across these services, you will get a new
+          serparate account for every distinct email address encountered.
+        </p>
+        <div class="row top-buffer">
+          <div class="col-md-offset-4 col-md-4">
+            <a class="btn btn-block btn-social btn-facebook "href="/auth/facebook">
+              <span class="fa fa-facebook"></span> Sign in with Facebook
+            </a>
+            <a class="btn btn-block btn-social btn-google "href="/auth/google">
+              <span class="fa fa-google"></span> Sign in with Google
+            </a>
+            <a class="btn btn-block btn-social btn-github" href="/auth/github">
+              <span class="fa fa-github"></span> Sign in with GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.container -->
+
+    <div class="footer">
+      <div class="container">
+        <p class="text-muted">
+          <a href="https://steemit.com/@void" target="_blank">@void</a>
+          &nbsp;&nbsp;&nbsp;
+          <a href="https://steemit.com/created/steemwatch" target="_blank">#steemwatch</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="{{.CanonicalURL}}/assets/bootstrap/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="{{.CanonicalURL}}/assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>

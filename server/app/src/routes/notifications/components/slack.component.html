@@ -1,0 +1,69 @@
+<div>
+  <hr />
+  <h2><img src="/assets/img/Slack_Mark_Web-100x100.png"> Slack</h2>
+
+  <div *ngIf="!model">
+    <img src="/assets/img/loading.gif" />
+  </div>
+  <div *ngIf="model">
+    <p>
+      You need to configure the
+      <a
+        href="https://steem.slack.com/apps/new/A0F7XDUAZ-incoming-webhooks"
+        target="_blank">Incoming WebHooks</a>
+      Slack integration to send messages to you privately and pass the resulting
+      webhook URL into the input field below.
+    </p>
+    <p>
+      In case you don't have a Slack account yet, you can register for
+      <a href="https://steem.herokuapp.com" target="_blank">Steem Slack</a>
+      and then proceed to configure the integration mentioned.
+    </p>
+
+    <div *ngIf="formActive">
+      <form (ngSubmit)="onSubmit()" #slackForm="ngForm" class="notification-form">
+        <div class="form-group">
+          <label for="webhookURL">Webhook URL</label>
+          <input type="text" class="form-control" required
+            (keyup)="inputChanged()"
+            [(ngModel)]="model.settings.webhookURL"
+            ngControl="webhookURL" #webhookURL="ngForm" #input>
+          <div [hidden]="webhookURL.valid || webhookURL.pristine"
+            class="alert alert-danger"
+          >Webhook URL is required</div>
+        </div>
+
+        <button type="submit" class="btn btn-success"
+          [disabled]="!dirty || !slackForm.form.valid || saving">
+
+          <span *ngIf="!dirty ||  model.enabled">Save</span>
+          <span *ngIf=" dirty && !model.enabled">Save and Enable</span>
+        
+        </button>
+
+        <button type="button" class="btn btn-warning"
+          *ngIf="!webhookURL.dirty && model.enabled"
+          [ngClass]="enableButtonClassMap"
+          (click)="toggleEnabled()"
+          [disabled]="saving">
+
+          Disable
+        
+        </button>
+
+        <button type="button" class="btn btn-success"
+          *ngIf="!webhookURL.dirty && !model.enabled"
+          [ngClass]="enableButtonClassMap"
+          (click)="toggleEnabled()"
+          [disabled]="saving">
+
+          Enable
+        
+        </button>
+
+        <span *ngIf="errorMessage" class="api-error">Error: {{errorMessage}}</span>
+      </form>
+    </div>
+  </div>
+
+<div>

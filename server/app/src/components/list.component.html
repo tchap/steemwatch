@@ -1,0 +1,33 @@
+<div>
+  <table class="values">
+    <tr *ngFor="let item of model; let i = index">
+      <td>{{item}}</td>
+      <td class="button" (click)="remove(i)">
+        <span class="glyphicon glyphicon-remove-circle"></span>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <input #input
+          [(ngModel)]="userInput"
+          (keyup.enter)="add()"
+          [disabled]="disabled"
+          type="text" class="form-control" />
+      </td>
+      <td>
+        <button
+          (click)="add()"
+          [disabled]="disabled"
+          class="btn btn-default" type="button"
+        >
+          Add
+        </button>
+      </td>
+    </tr>
+  </table>
+  <div class="api-error-wrapper" *ngIf="errorMessage">
+    <span class="api-error">
+      Error: {{errorMessage}}
+    </span>
+  </div>
+</div>
