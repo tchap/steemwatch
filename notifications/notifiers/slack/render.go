@@ -54,6 +54,19 @@ func makeMessage(attachment *Attachment) *Payload {
 	}
 }
 
+// UserMentioned
+
+func renderUserMentionedEvent(event *events.UserMentioned) (*Payload, error) {
+	c := event.Content
+
+	txt := fmt.Sprintf("@%v was <https://steemit.com%v|mentioned> by @%v in %v",
+		event.User, c.URL, c.Author, c.Permlink)
+
+	return &Payload{
+		Text: txt,
+	}, nil
+}
+
 // StoryPublished
 
 func renderStoryPublishedEvent(event *events.StoryPublished) (*Payload, error) {

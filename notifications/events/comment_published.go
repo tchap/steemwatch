@@ -15,7 +15,7 @@ func NewCommentPublishedEventMiner() *CommentPublishedEventMiner {
 	return &CommentPublishedEventMiner{}
 }
 
-func (miner *CommentPublishedEventMiner) MineEvent(operation *rpc.Operation, content *rpc.Content) interface{} {
+func (miner *CommentPublishedEventMiner) MineEvent(operation *rpc.Operation, content *rpc.Content) []interface{} {
 	if content.IsStory() {
 		return nil
 	}
@@ -25,5 +25,5 @@ func (miner *CommentPublishedEventMiner) MineEvent(operation *rpc.Operation, con
 		return nil
 	}
 
-	return &CommentPublished{op, content}
+	return []interface{}{&CommentPublished{op, content}}
 }

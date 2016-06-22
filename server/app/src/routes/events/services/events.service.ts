@@ -8,6 +8,18 @@ import { Event } from '../../../interfaces';
 
 const events : Event[] = [
   {
+    id:          "user.mentioned",
+    title:       "User Mentioned",
+    description: "A user was mentioned in a story or a comment using @-mention notation.",
+    fields:      [
+      {
+        id:          "users",
+        label:       "Users",
+        description: "You will be notified when any of the following users is @-mentioned on Steemit."
+      }
+    ]
+  },
+  {
     id:          "story.published",
     title:       "Story Published",
     description: "A story was published",

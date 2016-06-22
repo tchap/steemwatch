@@ -80,6 +80,16 @@ func SetWebhookTimeout(timeout time.Duration) NotifierOption {
 	}
 }
 
+func (notifier *Notifier) DispatchUserMentionedEvent(
+	userId string,
+	userSettings bson.Raw,
+	event *events.UserMentioned,
+) error {
+	return notifier.dispatch(userId, userSettings, func() (*Payload, error) {
+		return renderUserMentionedEvent(event)
+	})
+}
+
 func (notifier *Notifier) DispatchStoryPublishedEvent(
 	userId string,
 	userSettings bson.Raw,

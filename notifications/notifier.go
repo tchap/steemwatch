@@ -12,6 +12,7 @@ var availableNotifiers = map[string]Notifier{
 }
 
 type Notifier interface {
+	DispatchUserMentionedEvent(userId string, userSettings bson.Raw, event *events.UserMentioned) error
 	DispatchStoryPublishedEvent(userId string, userSettings bson.Raw, event *events.StoryPublished) error
 	DispatchStoryVotedEvent(userId string, userSettings bson.Raw, event *events.StoryVoted) error
 	DispatchCommentPublishedEvent(userId string, userSettings bson.Raw, event *events.CommentPublished) error

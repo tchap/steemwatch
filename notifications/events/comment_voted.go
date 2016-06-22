@@ -15,7 +15,7 @@ func NewCommentVotedEventMiner() *CommentVotedEventMiner {
 	return &CommentVotedEventMiner{}
 }
 
-func (miner *CommentVotedEventMiner) MineEvent(operation *rpc.Operation, content *rpc.Content) interface{} {
+func (miner *CommentVotedEventMiner) MineEvent(operation *rpc.Operation, content *rpc.Content) []interface{} {
 	if content.IsStory() {
 		return nil
 	}
@@ -25,5 +25,5 @@ func (miner *CommentVotedEventMiner) MineEvent(operation *rpc.Operation, content
 		return nil
 	}
 
-	return &CommentVoted{op, content}
+	return []interface{}{&CommentVoted{op, content}}
 }

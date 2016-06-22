@@ -5,5 +5,5 @@ import (
 )
 
 type EventMiner interface {
-	MineEvent(*rpc.Operation, *rpc.Content) (event interface{})
+	MineEvent(*rpc.Operation, *rpc.Content) (events []interface{})
 }
