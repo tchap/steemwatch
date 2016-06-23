@@ -46,7 +46,7 @@ func _main() error {
 
 	// Start catching signals.
 	signalCh := make(chan os.Signal, 1)
-	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGKILL)
+	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
 
 	// XXX: Not the greatest ideas to share MongoDB session.
 	//      In case it is closed from one component, the other panics.

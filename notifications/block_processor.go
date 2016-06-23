@@ -2,6 +2,8 @@ package notifications
 
 import (
 	"log"
+	"sync"
+	"time"
 
 	"github.com/tchap/steemwatch/notifications/events"
 
@@ -23,7 +25,8 @@ type BlockProcessor struct {
 
 	eventMiners []EventMiner
 
-	lastProcessedBlockNum uint32
+	blockProcessingLock *sync.Mutex
+	lastBlockNumCh      chan uint32
 
 	t *tomb.Tomb
 }
@@ -54,21 +57,22 @@ func New(client *rpc.Client, db *mgo.Database) (*BlockProcessor, error) {
 		events.NewCommentVotedEventMiner(),
 	}
 
-	// Make sure the tomb is marked as dead.
-	var t tomb.Tomb
-	t.Go(func() error {
-		<-t.Dying()
-		return nil
-	})
+	// Create a new BlockProcessor instance.
+	processor := &BlockProcessor{
+		client:              client,
+		db:                  db,
+		config:              &config,
+		eventMiners:         eventMiners,
+		blockProcessingLock: new(sync.Mutex),
+		lastBlockNumCh:      make(chan uint32, 1),
+		t:                   new(tomb.Tomb),
+	}
 
-	// Return a new BlockProcessor instance.
-	return &BlockProcessor{
-		client:      client,
-		db:          db,
-		config:      &config,
-		eventMiners: eventMiners,
-		t:           &t,
-	}, nil
+	// Start the config flusher.
+	processor.t.Go(processor.configFlusher)
+
+	// Return the new BlockProcessor.
+	return processor, nil
 }
 
 func (processor *BlockProcessor) BlockRange() (from, to uint32) {
@@ -76,6 +80,9 @@ func (processor *BlockProcessor) BlockRange() (from, to uint32) {
 }
 
 func (processor *BlockProcessor) ProcessBlock(block *rpc.Block) error {
+	processor.blockProcessingLock.Lock()
+	defer processor.blockProcessingLock.Unlock()
+
 	for _, tx := range block.Transactions {
 		for _, op := range tx.Operations {
 			// Fetch the associated content.
@@ -106,16 +113,60 @@ func (processor *BlockProcessor) ProcessBlock(block *rpc.Block) error {
 		}
 	}
 
-	processor.lastProcessedBlockNum = block.Number
+	processor.lastBlockNumCh <- block.Number
 	return nil
 }
 
 func (processor *BlockProcessor) Finalize() error {
 	processor.t.Kill(nil)
-	processor.t.Wait()
+	return processor.t.Wait()
+}
 
+func (processor *BlockProcessor) configFlusher() error {
+	var lastProcessedBlockNum uint32
+
+	var timeoutCh <-chan time.Time
+	resetTimeout := func() {
+		timeoutCh = time.After(1 * time.Minute)
+	}
+	resetTimeout()
+
+	for {
+		select {
+		// Store the last processed block number every time it is received.
+		case blockNum := <-processor.lastBlockNumCh:
+			lastProcessedBlockNum = blockNum
+
+		// Flush config every minute.
+		case <-timeoutCh:
+			if err := processor.flushConfig(lastProcessedBlockNum); err != nil {
+				return err
+			}
+			resetTimeout()
+
+		// Flush the config on exit.
+		case <-processor.t.Dying():
+
+			// Make sure ProcessBlock() is not running any more.
+			processor.blockProcessingLock.Lock()
+			defer processor.blockProcessingLock.Unlock()
+
+			// Check whether there is any additional block number in the queue.
+			select {
+			case blockNum := <-processor.lastBlockNumCh:
+				lastProcessedBlockNum = blockNum
+			default:
+			}
+
+			// Flush the config at last.
+			return processor.flushConfig(lastProcessedBlockNum)
+		}
+	}
+}
+
+func (processor *BlockProcessor) flushConfig(lastProcessedBlockNum uint32) error {
 	config := &BlockProcessorConfig{
-		NextBlockNum: processor.lastProcessedBlockNum + 1,
+		NextBlockNum: lastProcessedBlockNum + 1,
 	}
 	if _, err := processor.db.C("configuration").UpsertId("BlockProcessor", config); err != nil {
 		return errors.Wrapf(err, "failed to store BlockProcessor configuration: %+v", config)
