@@ -31,10 +31,13 @@
           <div [hidden]="webhookURL.valid || webhookURL.pristine"
             class="alert alert-danger"
           >Webhook URL is required</div>
+          <div *ngIf="model.settings.webhookURL && notSlackURL && !webhookURL.pristine"
+            class="alert alert-danger"
+          >Not a valid Incoming WebHooks URL</div>
         </div>
 
         <button type="submit" class="btn btn-success"
-          [disabled]="!dirty || !slackForm.form.valid || saving">
+          [disabled]="!dirty || !slackForm.form.valid || notSlackURL || saving">
 
           <span *ngIf="!dirty ||  model.enabled">Save</span>
           <span *ngIf=" dirty && !model.enabled">Save and Enable</span>

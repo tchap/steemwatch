@@ -16,6 +16,7 @@ export class SlackComponent implements OnInit {
 
   model: SlackModel;
   storedWebhookURL: string;
+  notSlackURL: boolean;
   dirty: boolean;
 
   @ViewChild('input') input;
@@ -41,7 +42,11 @@ export class SlackComponent implements OnInit {
   }
 
   inputChanged() {
-    this.dirty = this.model.settings.webhookURL !== this.storedWebhookURL;
+    const webhookURL = this.model.settings.webhookURL;
+
+    this.notSlackURL = !webhookURL.startsWith('https://hooks.slack.com/services');
+
+    this.dirty = webhookURL !== this.storedWebhookURL;
 
     if (this.storedWebhookURL && !this.dirty) {
       this.formActive = false;
