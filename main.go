@@ -51,9 +51,12 @@ func _main() error {
 	}
 
 	// Start notifications.
-	notificationsCtx, err := runNotifications(db, cfg)
+	notificationsCtx, client, err := runNotifications(db, cfg)
 	if err != nil {
 		return err
+	}
+	if client != nil {
+		defer client.Close()
 	}
 
 	// Start processing signals.
@@ -98,19 +101,23 @@ func _main() error {
 	return nil
 }
 
-func runNotifications(db *mgo.Database, cfg *config.Config) (*blockfetcher.Context, error) {
+func runNotifications(db *mgo.Database, cfg *config.Config) (*blockfetcher.Context, *rpc.Client, error) {
 	if cfg.SteemdDisabled {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	// Connect to steemd.
 	client, err := rpc.Dial(cfg.SteemdRPCEndpointAddress)
 	if err != nil {
-		return nil, errors.Wrapf(
+		return nil, nil, errors.Wrapf(
 			err, "failed to connect to steemd using %v", cfg.SteemdRPCEndpointAddress)
 	}
-	defer client.Close()
 
 	// Start the block processor.
-	return notifications.Run(client, db)
+	ctx, err := notifications.Run(client, db)
+	if err != nil {
+		client.Close()
+		return nil, nil, err
+	}
+	return ctx, client, nil
 }
