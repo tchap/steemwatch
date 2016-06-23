@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-steem/rpc"
 	"github.com/pkg/errors"
+	"github.com/steemwatch/blockfetcher"
 	"gopkg.in/mgo.v2"
 )
 
@@ -34,15 +35,7 @@ func _main() error {
 		return errors.Wrapf(err, "failed to connect to MongoDB using %v", cfg.MongoURL)
 	}
 	defer mongo.Close()
-	db := mongo.DB("steemwatch")
-
-	// Connect to steemd.
-	client, err := rpc.Dial(cfg.SteemdRPCEndpointAddress)
-	if err != nil {
-		return errors.Wrapf(
-			err, "failed to connect to steemd using %v", cfg.SteemdRPCEndpointAddress)
-	}
-	defer client.Close()
+	db := mongo.DB("")
 
 	// Start catching signals.
 	signalCh := make(chan os.Signal, 1)
@@ -51,14 +44,14 @@ func _main() error {
 	// XXX: Not the greatest ideas to share MongoDB session.
 	//      In case it is closed from one component, the other panics.
 
-	// Start the block processor.
-	notificationsCtx, err := notifications.Run(client, db)
+	// Start the web server.
+	serverCtx, err := server.Run(db, cfg)
 	if err != nil {
 		return err
 	}
 
-	// Start the web server.
-	serverCtx, err := server.Run(db, cfg)
+	// Start notifications.
+	notificationsCtx, err := runNotifications(db, cfg)
 	if err != nil {
 		return err
 	}
@@ -68,16 +61,23 @@ func _main() error {
 		<-signalCh
 		signal.Stop(signalCh)
 		log.Println("Signal received, exiting...")
-		notificationsCtx.Interrupt()
+
 		serverCtx.Interrupt()
+
+		if notificationsCtx != nil {
+			notificationsCtx.Interrupt()
+		}
 	}()
 
 	errCh := make(chan error, 2)
 
 	go func() {
-		err := notificationsCtx.Wait()
-		if err != nil {
-			log.Printf("Notifications error: %+v", err)
+		var err error
+		if notificationsCtx != nil {
+			err = notificationsCtx.Wait()
+			if err != nil {
+				log.Printf("Notifications error: %+v", err)
+			}
 		}
 		errCh <- err
 	}()
@@ -96,4 +96,21 @@ func _main() error {
 		}
 	}
 	return nil
+}
+
+func runNotifications(db *mgo.Database, cfg *config.Config) (*blockfetcher.Context, error) {
+	if cfg.SteemdDisabled {
+		return nil, nil
+	}
+
+	// Connect to steemd.
+	client, err := rpc.Dial(cfg.SteemdRPCEndpointAddress)
+	if err != nil {
+		return nil, errors.Wrapf(
+			err, "failed to connect to steemd using %v", cfg.SteemdRPCEndpointAddress)
+	}
+	defer client.Close()
+
+	// Start the block processor.
+	return notifications.Run(client, db)
 }

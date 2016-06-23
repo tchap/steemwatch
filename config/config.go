@@ -20,6 +20,7 @@ type Config struct {
 
 	MongoURL string `envconfig:"MONGO_URL" default:"localhost"`
 
+	SteemdDisabled           bool   `envconfig:"STEEMD_DISABLED"`
 	SteemdRPCEndpointAddress string `envconfig:"STEEMD_RPC_ENDPOINT_ADDRESS" default:"ws://localhost:8090"`
 }
 
