@@ -3,6 +3,7 @@ package server
 import (
 	"net"
 	"net/url"
+	"time"
 
 	"github.com/tchap/steemwatch/config"
 	"github.com/tchap/steemwatch/server/auth"
@@ -129,9 +130,12 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 	}
 
 	ctx.t.Go(func() error {
-		e.Run(fasthttp.WithConfig(engine.Config{
+		srv := fasthttp.WithConfig(engine.Config{
 			Listener: listener,
-		}))
+		})
+		srv.MaxKeepaliveDuration = 30 * time.Second
+
+		e.Run(srv)
 		return nil
 	})
 
