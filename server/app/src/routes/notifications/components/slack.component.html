@@ -24,7 +24,7 @@
       <form (ngSubmit)="onSubmit()" #slackForm="ngForm" class="notification-form">
         <div class="form-group">
           <label for="webhookURL">Webhook URL</label>
-          <input type="text" class="form-control" required
+          <input type="url" class="form-control" required
             (keyup)="inputChanged()"
             [(ngModel)]="model.settings.webhookURL"
             ngControl="webhookURL" #webhookURL="ngForm" #input>
@@ -42,7 +42,7 @@
         </button>
 
         <button type="button" class="btn btn-warning"
-          *ngIf="!webhookURL.dirty && model.enabled"
+          *ngIf="model.settings.webhookURL && !webhookURL.dirty && model.enabled"
           [ngClass]="enableButtonClassMap"
           (click)="toggleEnabled()"
           [disabled]="saving">
@@ -52,7 +52,7 @@
         </button>
 
         <button type="button" class="btn btn-success"
-          *ngIf="!webhookURL.dirty && !model.enabled"
+          *ngIf="model.settings.webhookURL && !webhookURL.dirty && !model.enabled"
           [ngClass]="enableButtonClassMap"
           (click)="toggleEnabled()"
           [disabled]="saving">

@@ -43,7 +43,7 @@ export class SlackComponent implements OnInit {
   inputChanged() {
     this.dirty = this.model.settings.webhookURL !== this.storedWebhookURL;
 
-    if (!this.dirty) {
+    if (this.storedWebhookURL && !this.dirty) {
       this.formActive = false;
       setTimeout(() => {
         this.formActive = true;
@@ -58,13 +58,16 @@ export class SlackComponent implements OnInit {
     this.saving = true;
     const enabled = this.model.enabled;
     this.model.enabled = true;
+    this.model.settings.webhookURL = this.model.settings.webhookURL.trim();
 
     this.slackService.save(this.model)
       .subscribe(
         () => {
           this.storedWebhookURL = this.model.settings.webhookURL;
+          this.dirty = false;
           this.saving = false;
           this.errorMessage = null;
+          setTimeout(() => this.inputChanged(), 0);
         },
         (err) => {
           this.model.enabled = enabled;

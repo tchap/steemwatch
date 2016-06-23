@@ -3,6 +3,7 @@ package slack
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 
 	"github.com/tchap/steemwatch/server/context"
 	"github.com/tchap/steemwatch/server/users"
@@ -30,9 +31,12 @@ func (doc *Document) Validate() error {
 		return errors.New("field not set: enabled")
 	case doc.Settings == nil || doc.Settings.WebhookURL == "":
 		return errors.New("field not set: settings.webhookURL")
-	default:
-		return nil
 	}
+
+	if _, err := url.Parse(doc.Settings.WebhookURL); err != nil {
+		return errors.Wrap(err, "settings.webhookURL is not a valid URL")
+	}
+	return nil
 }
 
 func Bind(serverCtx *context.Context, root *echo.Group) {
