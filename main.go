@@ -72,20 +72,28 @@ func _main() error {
 		serverCtx.Interrupt()
 	}()
 
-	var crashed bool
+	errCh := make(chan error, 2)
 
-	if err := notificationsCtx.Wait(); err != nil {
-		log.Printf("Notifications error: %+v", err)
-		crashed = true
-	}
+	go func() {
+		err := notificationsCtx.Wait()
+		if err != nil {
+			log.Printf("Notifications error: %+v", err)
+		}
+		errCh <- err
+	}()
 
-	if err := serverCtx.Wait(); err != nil {
-		log.Printf("Web server error: %+v", err)
-		crashed = true
-	}
+	go func() {
+		err := serverCtx.Wait()
+		if err != nil {
+			log.Printf("Web server error: %+v", err)
+		}
+		errCh <- err
+	}()
 
-	if crashed {
-		return errors.New("crashed")
+	for i := 0; i < cap(errCh); i++ {
+		if err := <-errCh; err != nil {
+			return errors.New("crashed")
+		}
 	}
 	return nil
 }
