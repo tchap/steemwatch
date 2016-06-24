@@ -123,7 +123,7 @@ func (processor *BlockProcessor) Finalize() error {
 }
 
 func (processor *BlockProcessor) configFlusher() error {
-	var lastProcessedBlockNum uint32
+	lastProcessedBlockNum := processor.config.NextBlockNum
 
 	var timeoutCh <-chan time.Time
 	resetTimeout := func() {
