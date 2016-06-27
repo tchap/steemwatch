@@ -30,12 +30,16 @@ func _main() error {
 	}
 
 	// Connect to MongoDB.
-	mongo, err := mgo.Dial(cfg.MongoURL)
+	wMongo, err := mgo.Dial(cfg.MongoURL)
 	if err != nil {
 		return errors.Wrapf(err, "failed to connect to MongoDB using %v", cfg.MongoURL)
 	}
-	defer mongo.Close()
-	db := mongo.DB("")
+	defer wMongo.Close()
+	wDB := wMongo.DB("")
+
+	nMongo := wMongo.Copy()
+	defer nMongo.Close()
+	nDB := nMongo.DB("")
 
 	// Start catching signals.
 	signalCh := make(chan os.Signal, 1)
@@ -45,13 +49,13 @@ func _main() error {
 	//      In case it is closed from one component, the other panics.
 
 	// Start the web server.
-	serverCtx, err := server.Run(db, cfg)
+	serverCtx, err := server.Run(wDB, cfg)
 	if err != nil {
 		return err
 	}
 
 	// Start notifications.
-	notificationsCtx, client, err := runNotifications(db, cfg)
+	notificationsCtx, client, err := runNotifications(nDB, cfg)
 	if err != nil {
 		return err
 	}
