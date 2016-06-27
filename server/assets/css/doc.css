@@ -103,3 +103,12 @@ table.values .button {
   border-radius: 4px;
   border: 1px solid transparent;
 }
+
+.loading-small {
+  width: 30px;
+  height: 30px;
+}
+
+#childContentAddedModal .close {
+  display: none;
+}

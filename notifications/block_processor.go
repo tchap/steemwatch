@@ -1,11 +1,13 @@
 package notifications
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"time"
 
 	"github.com/tchap/steemwatch/notifications/events"
+	"github.com/tchap/steemwatch/server/routes/api/events/descendantpublished"
 
 	"github.com/go-steem/rpc"
 	"github.com/go-steem/rpc/apis/database"
@@ -294,7 +296,76 @@ func (processor *BlockProcessor) HandleCommentPublishedEvent(event *events.Comme
 	for iter.Next(&result) {
 		processor.DispatchCommentPublishedEvent(result.OwnerId.Hex(), event)
 	}
-	return errors.Wrap(iter.Err(), "failed get target users for comment.published")
+	if err := iter.Err(); err != nil {
+		return errors.Wrap(err, "failed get target users for comment.published")
+	}
+
+	// We also need to check for descendant.published here.
+	return processor.handleDescendantPublished(event)
+}
+
+func (processor *BlockProcessor) handleDescendantPublished(event *events.CommentPublished) error {
+	var (
+		parentAuthor        = event.Content.ParentAuthor
+		parentPermlink      = event.Content.ParentPermlink
+		distance       uint = 1
+	)
+
+	for {
+		contentID := fmt.Sprintf("@%v/%v", parentAuthor, parentPermlink)
+
+		query := bson.M{
+			"kind":                "descendant.published",
+			"selectors.contentID": contentID,
+		}
+
+		selector := bson.M{
+			"ownerId": 1,
+			"selectors": bson.M{
+				"$elemMatch": bson.M{
+					"contentID": contentID,
+				},
+			},
+		}
+
+		log.Println(query)
+
+		var result descendantpublished.Document
+		iter := processor.db.C("events").Find(query).Select(selector).Iter()
+		for iter.Next(&result) {
+			// It should be perfectly fine to just index the first item in the array
+			// since $elemMatch should return just the first match and the array
+			// should never be empty, otherwise the document would not be returned.
+			selector := result.Selectors[0]
+			switch selector.Mode {
+			case descendantpublished.SelectorModeAny:
+				processor.DispatchCommentPublishedEvent(result.OwnerID.Hex(), event)
+
+			case descendantpublished.SelectorModeDepthLimit:
+				if distance <= selector.DepthLimit {
+					processor.DispatchCommentPublishedEvent(result.OwnerID.Hex(), event)
+				}
+
+			default:
+				panic("unreachable code reached")
+			}
+		}
+		if err := iter.Err(); err != nil {
+			return errors.Wrap(iter.Err(), "failed get target users for descendant.published")
+		}
+
+		parent, err := processor.client.Database.GetContent(parentAuthor, parentPermlink)
+		if err != nil {
+			return errors.Wrap(err, "failed to call get_content over RPC")
+		}
+		if parent.IsStory() {
+			return nil
+		}
+
+		parentAuthor = parent.ParentAuthor
+		parentPermlink = parent.ParentPermlink
+		distance++
+	}
 }
 
 func (processor *BlockProcessor) HandleCommentVotedEvent(event *events.CommentVoted) error {

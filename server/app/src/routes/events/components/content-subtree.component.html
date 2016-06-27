@@ -1,0 +1,117 @@
+<div class="panel panel-primary">
+  <div class="panel-heading">Content Descendant Published</div>
+  <div class="panel-body">
+    <p>You will be notified when a content descendant matching one of the
+    following rules is created or edited.</p>
+    <p>The idea is to specify a story or a comment by copy-pasting the
+    associated URL from Steemit.com and then choose what descendants to watch.
+    You can either watch any descendant content, or you can limit the descendant
+    content by depth. For example, setting the depth limit to 1 will cause
+    SteemWatch to watch just the immediate replies.</p>
+
+    <div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Content URL</th>
+            <th>Descendant Selection Mode</th>
+            <th>Depth limit</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tr *ngFor="let item of listModel; let i = index">
+          <td>{{item.rootURL}}</td>
+          <td>{{item.selectMode}}</td>
+          <td>
+            <span *ngIf="item.selectMode === 'depthLimit'">
+              {{item.depthLimit}}
+            </span>
+          </td>
+          <td class="button" (click)="remove(i)">
+            <span class="glyphicon glyphicon-remove-circle"></span>
+          </td>
+        </tr>
+      </table>
+      <div class="api-error-wrapper" *ngIf="removeErrorMessage">
+        <span class="api-error">
+          Error: {{removeErrorMessage}}
+        </span>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-primary"
+      data-toggle="modal"
+      data-target="#childContentAddedModal">
+
+      Add Rule
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="childContentAddedModal"
+      data-backdrop="static" data-keyboard="false"
+      tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+      aria-hidden="true">
+
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">New Content Descendant Rule</h4>
+          </div>
+          <form (ngSubmit)="onSubmit()" [formGroup]="form">
+            <div class="modal-body">
+
+              <div class="form-group">
+                <label for="rootURL">Content URL</label>
+                <p>This can be a story or a comment URL copied from Steemit.com</p>
+                <input class="form-control" type="url" name="rootURL" id="rootURL" required
+                  [(ngModel)]="modalModel.rootURL" #rootURL>
+              </div>
+
+              <label>Content Descendant Selection</label>
+              <p>Choose what descendants to watch:</p>
+              <div class="radio">
+                <label class="inline">
+                  <input type="radio" name="selectMode" [(ngModel)]="modalModel.selectMode"
+                    (click)="modeChanged()"
+                    value="any" checked>
+                  Any descendant content
+                </label>
+              </div>
+              <div class="radio">
+                <label class="inline">
+                  <input type="radio" name="selectMode" [(ngModel)]="modalModel.selectMode"
+                    (click)="modeChanged()"
+                    value="depthLimit">
+                  Limit descendant content by depth:
+                  <input class="form-control" type="number" name="depthLimit" min="1"
+                    [(ngModel)]="modalModel.depthLimit"
+                    [disabled]="modalModel.selectMode !== 'depthLimit'"
+                    [required]="modalModel.selectMode === 'depthLimit'">
+                </label>
+              </div>
+
+            </div>
+
+            <div class="modal-footer">
+              <span class="api-error-wrapper" *ngIf="saveErrorMessage">
+                <span class="api-error">
+                  Error: {{saveErrorMessage}}
+                </span>
+              </span>
+              <img *ngIf="saving" 
+                src="/assets/img/loading.gif"
+                class="loading-small" />
+              <button type="button" class="btn btn-default" data-dismiss="modal"
+                [disabled]="saving" #closeButton>Close</button>
+              <button type="submit" class="btn btn-primary"
+                [disabled]="!form.valid || saving">Add</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

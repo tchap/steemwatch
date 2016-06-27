@@ -11,6 +11,7 @@ import (
 	"github.com/tchap/steemwatch/server/auth/google"
 	"github.com/tchap/steemwatch/server/context"
 	"github.com/tchap/steemwatch/server/db"
+	"github.com/tchap/steemwatch/server/routes/api/events/descendantpublished"
 	"github.com/tchap/steemwatch/server/routes/api/notifiers/slack"
 	"github.com/tchap/steemwatch/server/routes/home"
 	"github.com/tchap/steemwatch/server/routes/logout"
@@ -115,7 +116,12 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 
 	// API
 	api := e.Group("/api", auth.Required(serverCtx))
+
+	// API - Events
+	descendantpublished.Bind(serverCtx, api.Group("/events/descendant.published"))
 	db.BindList(serverCtx, api.Group("/events/:kind/:list"))
+
+	// API - Notifiers
 	slack.Bind(serverCtx, api.Group("/notifiers/slack"))
 
 	// Start server
