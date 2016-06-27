@@ -3,13 +3,13 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
-	"net/http"
 	"net/url"
 	"time"
 
 	"github.com/tchap/steemwatch/notifications/events"
 
 	"github.com/pkg/errors"
+	"github.com/valyala/fasthttp"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -156,29 +156,30 @@ func (notifier *Notifier) send(webhookURL string, payload *Payload) error {
 	}
 
 	// Send the webhook. Wait for the given timeout before cancelling.
-	req, err := http.NewRequest("POST", webhookURL, &body)
-	if err != nil {
-		return errors.Wrap(err, "failed to create webhook request")
+	req := fasthttp.AcquireRequest()
+	res := fasthttp.AcquireResponse()
+
+	cleanup := func() {
+		fasthttp.ReleaseRequest(req)
+		fasthttp.ReleaseResponse(res)
 	}
-	req.Header.Set("Content-Type", "application/json")
 
-	transport := &http.Transport{}
-	client := &http.Client{Transport: transport}
+	req.Header.SetMethod("POST")
+	req.Header.SetContentType("application/json")
+	req.SetRequestURI(webhookURL)
+	req.SetBodyStream(&body, body.Len())
+	req.SetConnectionClose()
 
-	errCh := make(chan error, 1)
-	go func() {
-		_, err := client.Do(req)
-		if err != nil {
-			err = errors.Wrap(err, "failed to send Slack webhook")
-		}
-		errCh <- err
-	}()
-
-	select {
-	case err := <-errCh:
-		return err
-	case <-time.After(notifier.webhookTimeout):
-		transport.CancelRequest(req)
-		return <-errCh
+	if err := fasthttp.DoTimeout(req, res, notifier.webhookTimeout); err != nil {
+		cleanup()
+		return errors.Wrap(err, "failed to send Slack webhook")
 	}
+
+	if code := res.StatusCode(); code < 200 || code >= 300 {
+		cleanup()
+		return errors.Errorf("POST %v -> %v", webhookURL, code)
+	}
+
+	cleanup()
+	return nil
 }
