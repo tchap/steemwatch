@@ -24,10 +24,10 @@
       <form (ngSubmit)="onSubmit()" #slackForm="ngForm" class="notification-form">
         <div class="form-group">
           <label for="webhookURL">Webhook URL</label>
-          <input type="url" class="form-control" required
+          <input type="url" class="form-control" name="webhookURL" required
             (keyup)="inputChanged()"
             [(ngModel)]="model.settings.webhookURL"
-            ngControl="webhookURL" #webhookURL="ngForm" #input>
+            ngControl="webhookURL" #webhookURL="ngModel" #input>
           <div [hidden]="webhookURL.valid || webhookURL.pristine"
             class="alert alert-danger"
           >Webhook URL is required</div>
