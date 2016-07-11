@@ -5,12 +5,14 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/tchap/steemwatch/config"
 	"github.com/tchap/steemwatch/notifications"
 	"github.com/tchap/steemwatch/server"
 
 	"github.com/go-steem/rpc"
+	"github.com/go-steem/rpc/transports/websocket"
 	"github.com/pkg/errors"
 	"github.com/steemwatch/blockfetcher"
 	"gopkg.in/mgo.v2"
@@ -110,12 +112,24 @@ func runNotifications(db *mgo.Database, cfg *config.Config) (*blockfetcher.Conte
 		return nil, nil, nil
 	}
 
+	// Monitor the connection to steemd.
+	monitorChan := make(chan interface{})
+	go func() {
+		for event := range monitorChan {
+			log.Println("steemd connection:", event)
+		}
+	}()
+
 	// Connect to steemd.
-	client, err := rpc.Dial(cfg.SteemdRPCEndpointAddress)
+	t, err := websocket.NewTransport(cfg.SteemdRPCEndpointAddress,
+		websocket.SetAutoReconnectEnabled(true),
+		websocket.SetAutoReconnectMaxDelay(1*time.Minute),
+		websocket.SetMonitor(monitorChan))
 	if err != nil {
 		return nil, nil, errors.Wrapf(
 			err, "failed to connect to steemd using %v", cfg.SteemdRPCEndpointAddress)
 	}
+	client := rpc.NewClient(t)
 
 	// Start the block processor.
 	ctx, err := notifications.Run(client, db)

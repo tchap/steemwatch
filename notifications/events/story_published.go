@@ -1,12 +1,12 @@
 package events
 
 import (
-	"github.com/go-steem/rpc"
+	"github.com/go-steem/rpc/apis/database"
 )
 
 type StoryPublished struct {
-	Op      *rpc.CommentOperation
-	Content *rpc.Content
+	Op      *database.CommentOperation
+	Content *database.Content
 }
 
 type StoryPublishedEventMiner struct{}
@@ -15,12 +15,16 @@ func NewStoryPublishedEventMiner() *StoryPublishedEventMiner {
 	return &StoryPublishedEventMiner{}
 }
 
-func (miner *StoryPublishedEventMiner) MineEvent(operation *rpc.Operation, content *rpc.Content) []interface{} {
+func (miner *StoryPublishedEventMiner) MineEvent(
+	operation *database.Operation,
+	content *database.Content,
+) []interface{} {
+
 	if !content.IsStory() {
 		return nil
 	}
 
-	op, ok := operation.Body.(*rpc.CommentOperation)
+	op, ok := operation.Body.(*database.CommentOperation)
 	if !ok {
 		return nil
 	}

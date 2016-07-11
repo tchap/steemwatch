@@ -3,12 +3,12 @@ package events
 import (
 	"regexp"
 
-	"github.com/go-steem/rpc"
+	"github.com/go-steem/rpc/apis/database"
 )
 
 type UserMentioned struct {
-	Op      *rpc.CommentOperation
-	Content *rpc.Content
+	Op      *database.CommentOperation
+	Content *database.Content
 	User    string
 }
 
@@ -22,8 +22,12 @@ func NewUserMentionedEventMiner() *UserMentionedEventMiner {
 	}
 }
 
-func (miner *UserMentionedEventMiner) MineEvent(operation *rpc.Operation, content *rpc.Content) []interface{} {
-	op, ok := operation.Body.(*rpc.CommentOperation)
+func (miner *UserMentionedEventMiner) MineEvent(
+	operation *database.Operation,
+	content *database.Content,
+) []interface{} {
+
+	op, ok := operation.Body.(*database.CommentOperation)
 	if !ok {
 		return nil
 	}

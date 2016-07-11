@@ -1,9 +1,9 @@
 package notifications
 
 import (
-	"github.com/go-steem/rpc"
+	"github.com/go-steem/rpc/apis/database"
 )
 
 type EventMiner interface {
-	MineEvent(*rpc.Operation, *rpc.Content) (events []interface{})
+	MineEvent(*database.Operation, *database.Content) (events []interface{})
 }

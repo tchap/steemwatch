@@ -8,6 +8,7 @@ import (
 	"github.com/tchap/steemwatch/notifications/events"
 
 	"github.com/go-steem/rpc"
+	"github.com/go-steem/rpc/apis/database"
 	"github.com/pkg/errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -38,7 +39,7 @@ func New(client *rpc.Client, db *mgo.Database) (*BlockProcessor, error) {
 		if err == mgo.ErrNotFound {
 			// We need to get the last irreversible block number
 			// to know where to start processing blocks from initially.
-			props, err := client.GetDynamicGlobalProperties()
+			props, err := client.Database.GetDynamicGlobalProperties()
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to get steemd dynamic global properties")
 			}
@@ -79,7 +80,7 @@ func (processor *BlockProcessor) BlockRange() (from, to uint32) {
 	return processor.config.NextBlockNum, 0
 }
 
-func (processor *BlockProcessor) ProcessBlock(block *rpc.Block) error {
+func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
 	processor.blockProcessingLock.Lock()
 	defer processor.blockProcessingLock.Unlock()
 
@@ -87,14 +88,14 @@ func (processor *BlockProcessor) ProcessBlock(block *rpc.Block) error {
 		for _, op := range tx.Operations {
 			// Fetch the associated content.
 			var (
-				content *rpc.Content
+				content *database.Content
 				err     error
 			)
 			switch op := op.Body.(type) {
-			case *rpc.CommentOperation:
-				content, err = processor.client.GetContent(op.Author, op.Permlink)
-			case *rpc.VoteOperation:
-				content, err = processor.client.GetContent(op.Author, op.Permlink)
+			case *database.CommentOperation:
+				content, err = processor.client.Database.GetContent(op.Author, op.Permlink)
+			case *database.VoteOperation:
+				content, err = processor.client.Database.GetContent(op.Author, op.Permlink)
 			default:
 				continue
 			}
