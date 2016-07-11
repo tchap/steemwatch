@@ -6,12 +6,15 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/tchap/steemwatch/errs"
 	"github.com/tchap/steemwatch/notifications/events"
 
 	"github.com/pkg/errors"
 	"github.com/valyala/fasthttp"
 	"gopkg.in/mgo.v2/bson"
 )
+
+const DefaultMaxConcurrentRequests = 1000
 
 //
 // Settings
@@ -57,17 +60,24 @@ func UnmarshalSettings(userId string, raw bson.Raw) (*Settings, error) {
 //
 
 type Notifier struct {
-	webhookTimeout time.Duration
+	webhookTimeout        time.Duration
+	maxConcurrentRequests uint
+	requestSemaphore      chan struct{}
+	termCh                chan struct{}
 }
 
 func NewNotifier(opts ...NotifierOption) *Notifier {
 	notifier := &Notifier{
-		webhookTimeout: 30 * time.Second,
+		webhookTimeout:        30 * time.Second,
+		maxConcurrentRequests: DefaultMaxConcurrentRequests,
+		termCh:                make(chan struct{}),
 	}
 
 	for _, opt := range opts {
 		opt(notifier)
 	}
+
+	notifier.requestSemaphore = make(chan struct{}, notifier.maxConcurrentRequests)
 
 	return notifier
 }
@@ -77,6 +87,12 @@ type NotifierOption func(*Notifier)
 func SetWebhookTimeout(timeout time.Duration) NotifierOption {
 	return func(notifier *Notifier) {
 		notifier.webhookTimeout = timeout
+	}
+}
+
+func SetMaxConcurrentRequests(maxConcurrentRequests uint) NotifierOption {
+	return func(notifier *Notifier) {
+		notifier.maxConcurrentRequests = maxConcurrentRequests
 	}
 }
 
@@ -149,6 +165,16 @@ func (notifier *Notifier) dispatch(
 }
 
 func (notifier *Notifier) send(webhookURL string, payload *Payload) error {
+	// Acquire a request slot.
+	select {
+	case notifier.requestSemaphore <- struct{}{}:
+		defer func() {
+			<-notifier.requestSemaphore
+		}()
+	case <-notifier.termCh:
+		return errs.ErrClosing
+	}
+
 	// Marshal the payload.
 	var body bytes.Buffer
 	if err := json.NewEncoder(&body).Encode(payload); err != nil {
@@ -182,4 +208,14 @@ func (notifier *Notifier) send(webhookURL string, payload *Payload) error {
 
 	cleanup()
 	return nil
+}
+
+func (notifier *Notifier) Close() error {
+	select {
+	case <-notifier.termCh:
+		return errs.ErrClosing
+	default:
+		close(notifier.termCh)
+		return nil
+	}
 }

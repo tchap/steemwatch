@@ -120,6 +120,11 @@ func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
 
 func (processor *BlockProcessor) Finalize() error {
 	processor.t.Kill(nil)
+
+	for _, notifier := range availableNotifiers {
+		notifier.Close()
+	}
+
 	return processor.t.Wait()
 }
 

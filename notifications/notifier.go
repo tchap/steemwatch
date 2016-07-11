@@ -1,6 +1,8 @@
 package notifications
 
 import (
+	"io"
+
 	"github.com/tchap/steemwatch/notifications/events"
 	"github.com/tchap/steemwatch/notifications/notifiers/slack"
 
@@ -17,4 +19,6 @@ type Notifier interface {
 	DispatchStoryVotedEvent(userId string, userSettings bson.Raw, event *events.StoryVoted) error
 	DispatchCommentPublishedEvent(userId string, userSettings bson.Raw, event *events.CommentPublished) error
 	DispatchCommentVotedEvent(userId string, userSettings bson.Raw, event *events.CommentVoted) error
+
+	io.Closer
 }
