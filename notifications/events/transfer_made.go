@@ -1,7 +1,6 @@
 package events
 
 import (
-	"fmt"
 	"github.com/go-steem/rpc/apis/database"
 )
 
@@ -20,7 +19,6 @@ func (miner *TransferMadeEventMiner) MineEvent(
 	content *database.Content, // nil
 ) []interface{} {
 
-	fmt.Printf("%T\n", operation.Body)
 	op, ok := operation.Body.(*database.TransferOperation)
 	if !ok {
 		return nil

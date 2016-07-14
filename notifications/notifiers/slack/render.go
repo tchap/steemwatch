@@ -54,17 +54,17 @@ func makeMessage(attachment *Attachment) *Payload {
 	}
 }
 
-// UserMentioned
+// AccountUpdated
 
-func renderUserMentionedEvent(event *events.UserMentioned) (*Payload, error) {
-	c := event.Content
+func renderAccountUpdatedEvent(event *events.AccountUpdated) (*Payload, error) {
+	summary := fmt.Sprintf("@%v's account was updated", event.Op.Account)
 
-	txt := fmt.Sprintf("@%v was <https://steemit.com%v|mentioned> by @%v in %v",
-		event.User, c.URL, c.Author, c.Permlink)
-
-	return &Payload{
-		Text: txt,
-	}, nil
+	return makeMessage(&Attachment{
+		Title:    "Account Update Detected",
+		Fallback: summary,
+		Color:    "#DC143C",
+		Text:     summary,
+	}), nil
 }
 
 // TransferMade
@@ -107,6 +107,19 @@ func renderTransferMadeEvent(event *events.TransferMade) (*Payload, error) {
 		})
 	}
 	return makeMessage(attachment), nil
+}
+
+// UserMentioned
+
+func renderUserMentionedEvent(event *events.UserMentioned) (*Payload, error) {
+	c := event.Content
+
+	txt := fmt.Sprintf("@%v was <https://steemit.com%v|mentioned> by @%v in %v",
+		event.User, c.URL, c.Author, c.Permlink)
+
+	return &Payload{
+		Text: txt,
+	}, nil
 }
 
 // StoryPublished

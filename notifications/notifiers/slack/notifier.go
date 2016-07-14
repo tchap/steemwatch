@@ -96,13 +96,13 @@ func SetMaxConcurrentRequests(maxConcurrentRequests uint) NotifierOption {
 	}
 }
 
-func (notifier *Notifier) DispatchUserMentionedEvent(
+func (notifier *Notifier) DispatchAccountUpdatedEvent(
 	userId string,
 	userSettings bson.Raw,
-	event *events.UserMentioned,
+	event *events.AccountUpdated,
 ) error {
 	return notifier.dispatch(userId, userSettings, func() (*Payload, error) {
-		return renderUserMentionedEvent(event)
+		return renderAccountUpdatedEvent(event)
 	})
 }
 
@@ -113,6 +113,16 @@ func (notifier *Notifier) DispatchTransferMadeEvent(
 ) error {
 	return notifier.dispatch(userId, userSettings, func() (*Payload, error) {
 		return renderTransferMadeEvent(event)
+	})
+}
+
+func (notifier *Notifier) DispatchUserMentionedEvent(
+	userId string,
+	userSettings bson.Raw,
+	event *events.UserMentioned,
+) error {
+	return notifier.dispatch(userId, userSettings, func() (*Payload, error) {
+		return renderUserMentionedEvent(event)
 	})
 }
 

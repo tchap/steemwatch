@@ -8,14 +8,14 @@ import { Event } from '../../../interfaces';
 
 const events : Event[] = [
   {
-    id:          "user.mentioned",
-    title:       "User Mentioned",
-    description: "A user was mentioned in a story or a comment using @-mention notation.",
+    id:          "account.updated",
+    title:       "Account Updated",
+    description: "User account was updated.",
     fields:      [
       {
-        id:          "users",
-        label:       "Users",
-        description: "You will be notified when any of the following users is @-mentioned on Steemit."
+        id:          "accounts",
+        label:       "Accounts",
+        description: "You will be notified when any of the following accounts is updated."
       }
     ]
   },
@@ -33,6 +33,18 @@ const events : Event[] = [
         id:          "to",
         label:       "To",
         description: "You will be notified when a transfer is made to one of the following accounts."
+      }
+    ]
+  },
+  {
+    id:          "user.mentioned",
+    title:       "User Mentioned",
+    description: "A user was mentioned in a story or a comment using @-mention notation.",
+    fields:      [
+      {
+        id:          "users",
+        label:       "Users",
+        description: "You will be notified when any of the following users is @-mentioned on Steemit."
       }
     ]
   },
