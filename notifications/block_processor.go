@@ -26,7 +26,7 @@ type BlockProcessor struct {
 	db     *mgo.Database
 	config *BlockProcessorConfig
 
-	eventMiners []EventMiner
+	eventMiners map[string][]EventMiner
 
 	blockProcessingLock *sync.Mutex
 	lastBlockNumCh      chan uint32
@@ -52,12 +52,19 @@ func New(client *rpc.Client, db *mgo.Database) (*BlockProcessor, error) {
 	}
 
 	// Instantiate event miners.
-	eventMiners := []EventMiner{
-		events.NewUserMentionedEventMiner(),
-		events.NewStoryPublishedEventMiner(),
-		events.NewStoryVotedEventMiner(),
-		events.NewCommentPublishedEventMiner(),
-		events.NewCommentVotedEventMiner(),
+	eventMiners := map[string][]EventMiner{
+		database.OpTypeComment: []EventMiner{
+			events.NewUserMentionedEventMiner(),
+			events.NewStoryPublishedEventMiner(),
+			events.NewCommentPublishedEventMiner(),
+		},
+		database.OpTypeVote: []EventMiner{
+			events.NewStoryVotedEventMiner(),
+			events.NewCommentVotedEventMiner(),
+		},
+		database.OpTypeTransfer: []EventMiner{
+			events.NewTransferMadeEventMiner(),
+		},
 	}
 
 	// Create a new BlockProcessor instance.
@@ -88,25 +95,29 @@ func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
 
 	for _, tx := range block.Transactions {
 		for _, op := range tx.Operations {
-			// Fetch the associated content.
+			// Fetch the associated content in case
+			// this is a content-related operation.
 			var (
 				content *database.Content
 				err     error
 			)
-			switch op := op.Body.(type) {
+			switch body := op.Body.(type) {
 			case *database.CommentOperation:
-				content, err = processor.client.Database.GetContent(op.Author, op.Permlink)
+				content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
 			case *database.VoteOperation:
-				content, err = processor.client.Database.GetContent(op.Author, op.Permlink)
-			default:
-				continue
+				content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
 			}
 			if err != nil {
 				return err
 			}
 
-			// Mine events.
-			for _, eventMiner := range processor.eventMiners {
+			// Get miners associated with the given operation.
+			miners, ok := processor.eventMiners[op.Type]
+			if !ok {
+				continue
+			}
+			// Mine events and handle them.
+			for _, eventMiner := range miners {
 				for _, event := range eventMiner.MineEvent(op, content) {
 					if err := processor.handleEvent(event); err != nil {
 						return err
@@ -191,6 +202,8 @@ func (processor *BlockProcessor) handleEvent(event interface{}) error {
 	switch event := event.(type) {
 	case *events.UserMentioned:
 		return processor.HandleUserMentionedEvent(event)
+	case *events.TransferMade:
+		return processor.HandleTransferMadeEvent(event)
 	case *events.StoryPublished:
 		return processor.HandleStoryPublishedEvent(event)
 	case *events.StoryVoted:
@@ -220,6 +233,31 @@ func (processor *BlockProcessor) HandleUserMentionedEvent(event *events.UserMent
 		processor.DispatchUserMentionedEvent(result.OwnerId.Hex(), event)
 	}
 	return errors.Wrap(iter.Err(), "failed get target users for user.mentioned")
+}
+
+func (processor *BlockProcessor) HandleTransferMadeEvent(event *events.TransferMade) error {
+	query := bson.M{
+		"kind": "transfer.made",
+		"$or": []interface{}{
+			bson.M{
+				"from": event.Op.From,
+			},
+			bson.M{
+				"to": event.Op.To,
+			},
+		},
+	}
+
+	log.Println(query)
+
+	var result struct {
+		OwnerId bson.ObjectId `bson:"ownerId"`
+	}
+	iter := processor.db.C("events").Find(query).Iter()
+	for iter.Next(&result) {
+		processor.DispatchTransferMadeEvent(result.OwnerId.Hex(), event)
+	}
+	return errors.Wrap(iter.Err(), "failed get target users for transfer.made")
 }
 
 func (processor *BlockProcessor) HandleStoryPublishedEvent(event *events.StoryPublished) error {
@@ -442,6 +480,14 @@ func (processor *BlockProcessor) DispatchUserMentionedEvent(userId string, event
 	processor.t.Go(func() error {
 		return processor.dispatchEvent(userId, func(notifier Notifier, settings bson.Raw) error {
 			return notifier.DispatchUserMentionedEvent(userId, settings, event)
+		})
+	})
+}
+
+func (processor *BlockProcessor) DispatchTransferMadeEvent(userId string, event *events.TransferMade) {
+	processor.t.Go(func() error {
+		return processor.dispatchEvent(userId, func(notifier Notifier, settings bson.Raw) error {
+			return notifier.DispatchTransferMadeEvent(userId, settings, event)
 		})
 	})
 }

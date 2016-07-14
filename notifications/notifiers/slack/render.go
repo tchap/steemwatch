@@ -67,6 +67,48 @@ func renderUserMentionedEvent(event *events.UserMentioned) (*Payload, error) {
 	}, nil
 }
 
+// TransferMade
+
+func renderTransferMadeEvent(event *events.TransferMade) (*Payload, error) {
+	op := event.Op
+
+	summary := fmt.Sprintf("@%v transferred %v to @%v", op.From, op.Amount, op.To)
+
+	attachment := &Attachment{
+		Fallback: summary,
+		Color:    "#00B2EE",
+		Pretext:  "A transfer you are interested in was made.",
+		Fields: []*Field{
+			{
+				Title: "From",
+				Value: op.From,
+				Short: true,
+			},
+			{
+				Title: "To",
+				Value: op.To,
+				Short: true,
+			},
+			{
+				Title: "Amount",
+				Value: op.Amount,
+				Short: true,
+			},
+			{
+				Title: "Memo",
+				Value: op.Memo,
+			},
+		},
+	}
+	if op.Memo != "" {
+		attachment.Fields = append(attachment.Fields, &Field{
+			Title: "Memo",
+			Value: op.Memo,
+		})
+	}
+	return makeMessage(attachment), nil
+}
+
 // StoryPublished
 
 func renderStoryPublishedEvent(event *events.StoryPublished) (*Payload, error) {

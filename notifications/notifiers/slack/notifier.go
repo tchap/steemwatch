@@ -106,6 +106,16 @@ func (notifier *Notifier) DispatchUserMentionedEvent(
 	})
 }
 
+func (notifier *Notifier) DispatchTransferMadeEvent(
+	userId string,
+	userSettings bson.Raw,
+	event *events.TransferMade,
+) error {
+	return notifier.dispatch(userId, userSettings, func() (*Payload, error) {
+		return renderTransferMadeEvent(event)
+	})
+}
+
 func (notifier *Notifier) DispatchStoryPublishedEvent(
 	userId string,
 	userSettings bson.Raw,

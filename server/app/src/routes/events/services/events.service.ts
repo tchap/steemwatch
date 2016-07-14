@@ -20,6 +20,23 @@ const events : Event[] = [
     ]
   },
   {
+    id:          "transfer.made",
+    title:       "Transfer Made",
+    description: "A transfer was made.",
+    fields:      [
+      {
+        id:          "from",
+        label:       "From",
+        description: "You will be notified when a transfer is made from one of the following accounts."
+      },
+      {
+        id:          "to",
+        label:       "To",
+        description: "You will be notified when a transfer is made to one of the following accounts."
+      }
+    ]
+  },
+  {
     id:          "story.published",
     title:       "Story Published",
     description: "A story was published",
