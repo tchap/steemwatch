@@ -267,8 +267,9 @@ func (processor *BlockProcessor) HandleTransferMadeEvent(event *events.TransferM
 
 func (processor *BlockProcessor) HandleUserMentionedEvent(event *events.UserMentioned) error {
 	query := bson.M{
-		"kind":  "user.mentioned",
-		"users": event.User,
+		"kind":            "user.mentioned",
+		"users":           event.User,
+		"authorBlacklist": bson.M{"$ne": event.Content.Author},
 	}
 
 	log.Println(query)

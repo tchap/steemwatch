@@ -45,6 +45,11 @@ const events : Event[] = [
         id:          "users",
         label:       "Users",
         description: "You will be notified when any of the following users is @-mentioned on Steemit."
+      },
+      {
+        id:          "authorBlacklist",
+        label:       "Author Blacklist",
+        description: "The notification is dropped when mentioned by one of the following authors."
       }
     ]
   },
