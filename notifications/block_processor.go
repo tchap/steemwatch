@@ -23,12 +23,14 @@ type BlockProcessorConfig struct {
 }
 
 func (config *BlockProcessorConfig) Clone() *BlockProcessorConfig {
-	lastBlockTimestamp := *config.LastBlockTimestamp
-
-	return &BlockProcessorConfig{
-		config.NextBlockNum,
-		&lastBlockTimestamp,
+	clone := &BlockProcessorConfig{
+		NextBlockNum: config.NextBlockNum,
 	}
+	if ts := config.LastBlockTimestamp; ts != nil {
+		lastBlockTimestamp := *ts
+		clone.LastBlockTimestamp = &lastBlockTimestamp
+	}
+	return clone
 }
 
 type BlockProcessor struct {
