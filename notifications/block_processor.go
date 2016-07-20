@@ -18,7 +18,19 @@ import (
 )
 
 type BlockProcessorConfig struct {
-	NextBlockNum uint32 `bson:"nextBlockNum"`
+	NextBlockNum       uint32     `bson:"nextBlockNum"`
+	LastBlockTimestamp *time.Time `bson:"lastBlockTimestamp,omitempty"`
+}
+
+func (config *BlockProcessorConfig) Clone() *BlockProcessorConfig {
+	clone := &BlockProcessorConfig{
+		NextBlockNum: config.NextBlockNum,
+	}
+	if ts := config.LastBlockTimestamp; ts != nil {
+		lastBlockTimestamp := *ts
+		clone.LastBlockTimestamp = &lastBlockTimestamp
+	}
+	return clone
 }
 
 type BlockProcessor struct {
@@ -29,7 +41,7 @@ type BlockProcessor struct {
 	eventMiners map[string][]EventMiner
 
 	blockProcessingLock *sync.Mutex
-	lastBlockNumCh      chan uint32
+	lastBlockCh         chan *database.Block
 
 	t *tomb.Tomb
 }
@@ -77,7 +89,7 @@ func New(client *rpc.Client, db *mgo.Database) (*BlockProcessor, error) {
 		config:              &config,
 		eventMiners:         eventMiners,
 		blockProcessingLock: new(sync.Mutex),
-		lastBlockNumCh:      make(chan uint32, 1),
+		lastBlockCh:         make(chan *database.Block, 1),
 		t:                   new(tomb.Tomb),
 	}
 
@@ -111,7 +123,7 @@ func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
 				content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
 			}
 			if err != nil {
-				return err
+				return errors.Wrap(err, "failed to get content")
 			}
 
 			// Get miners associated with the given operation.
@@ -130,7 +142,7 @@ func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
 		}
 	}
 
-	processor.lastBlockNumCh <- block.Number
+	processor.lastBlockCh <- block
 	return nil
 }
 
@@ -145,7 +157,11 @@ func (processor *BlockProcessor) Finalize() error {
 }
 
 func (processor *BlockProcessor) configFlusher() error {
-	lastProcessedBlockNum := processor.config.NextBlockNum
+	config := processor.config.Clone()
+	updateConfig := func(lastProcessedBlock *database.Block) {
+		config.NextBlockNum = lastProcessedBlock.Number + 1
+		config.LastBlockTimestamp = lastProcessedBlock.Timestamp.Time
+	}
 
 	var timeoutCh <-chan time.Time
 	resetTimeout := func() {
@@ -156,12 +172,12 @@ func (processor *BlockProcessor) configFlusher() error {
 	for {
 		select {
 		// Store the last processed block number every time it is received.
-		case blockNum := <-processor.lastBlockNumCh:
-			lastProcessedBlockNum = blockNum
+		case block := <-processor.lastBlockCh:
+			updateConfig(block)
 
 		// Flush config every minute.
 		case <-timeoutCh:
-			if err := processor.flushConfig(lastProcessedBlockNum); err != nil {
+			if err := processor.flushConfig(config); err != nil {
 				return err
 			}
 			resetTimeout()
@@ -175,25 +191,21 @@ func (processor *BlockProcessor) configFlusher() error {
 
 			// Check whether there is any additional block number in the queue.
 			select {
-			case blockNum := <-processor.lastBlockNumCh:
-				lastProcessedBlockNum = blockNum
+			case block := <-processor.lastBlockCh:
+				updateConfig(block)
 			default:
 			}
 
 			// Flush the config at last.
-			return processor.flushConfig(lastProcessedBlockNum)
+			return processor.flushConfig(config)
 		}
 	}
 }
 
-func (processor *BlockProcessor) flushConfig(lastProcessedBlockNum uint32) error {
-	config := &BlockProcessorConfig{
-		NextBlockNum: lastProcessedBlockNum + 1,
-	}
+func (processor *BlockProcessor) flushConfig(config *BlockProcessorConfig) error {
 	if _, err := processor.db.C("configuration").UpsertId("BlockProcessor", config); err != nil {
 		return errors.Wrapf(err, "failed to store BlockProcessor configuration: %+v", config)
 	}
-
 	return nil
 }
 
