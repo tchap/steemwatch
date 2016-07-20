@@ -13,6 +13,7 @@ import (
 	"github.com/tchap/steemwatch/server/db"
 	"github.com/tchap/steemwatch/server/routes/api/events/descendantpublished"
 	"github.com/tchap/steemwatch/server/routes/api/notifiers/slack"
+	"github.com/tchap/steemwatch/server/routes/api/v1/info"
 	"github.com/tchap/steemwatch/server/routes/home"
 	"github.com/tchap/steemwatch/server/routes/logout"
 	"github.com/tchap/steemwatch/server/sessions"
@@ -113,6 +114,9 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 	githubCallback := serverCtx.CanonicalURL.ResolveReference(githubCallbackPath).String()
 	githubAuth := github.NewAuthenticator(cfg.GitHubClientId, cfg.GitHubClientSecret, githubCallback)
 	auth.Bind(serverCtx, e.Group("/auth/github"), githubAuth)
+
+	// Public API
+	info.Bind(serverCtx, e.Group("/api/v1/info"))
 
 	// API
 	api := e.Group("/api", auth.Required(serverCtx))
