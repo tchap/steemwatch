@@ -47,9 +47,6 @@ func _main() error {
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
 
-	// XXX: Not the greatest ideas to share MongoDB session.
-	//      In case it is closed from one component, the other panics.
-
 	// Start the web server.
 	serverCtx, err := server.Run(wDB, cfg)
 	if err != nil {
