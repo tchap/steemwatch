@@ -123,7 +123,7 @@ func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
 				content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
 			}
 			if err != nil {
-				return err
+				return errors.Wrap(err, "failed to get content")
 			}
 
 			// Get miners associated with the given operation.
