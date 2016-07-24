@@ -1,0 +1,18 @@
+<div>
+  <a href="https://steemit.com/@{{model.author}}" target="_blank">
+    @{{model.author}}
+  </a>
+  <a href="https://steemit.com{{model.url}}" target="_blank">
+    commented
+  </a>
+  on @{{model.parentAuthor}}/{{model.parentPermlink}}.
+</div>
+<div>
+  <h5>Content</h5>
+  <p>{{model.content}}</p>
+  <p *ngIf="model.readMore">
+    <a href="https://steemit.com{{model.url}}" target="_blank">
+      Read more...
+    </a>
+  </p>
+</div>

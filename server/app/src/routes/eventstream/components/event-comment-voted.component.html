@@ -1,0 +1,25 @@
+<div>
+  <a href="https://steemit.com/@{{model.voter}}" target="_blank">
+    @{{model.voter}}
+  </a>
+  cast a vote on comment
+  <a href="https://steemit.com/@{{model.url}}" target="_blank">
+    @{{model.author}}/{{model.permlink}}
+  </a>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>Vote Weight</th>
+      <th>Pending Payout</th>
+      <th>Total Pending Payout</th>
+      <th>Total Payout</th>
+    </tr>
+  </thead>
+  <tr>
+    <td>{{model.voteWeight}}</td>
+    <td>{{model.pendingPayout}}</td>
+    <td>{{model.totalPendingPayout}}</td>
+    <td>{{model.totalPayout}}</td>
+  </tr>
+</table>

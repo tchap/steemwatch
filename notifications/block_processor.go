@@ -38,7 +38,8 @@ type BlockProcessor struct {
 	db     *mgo.Database
 	config *BlockProcessorConfig
 
-	eventMiners map[string][]EventMiner
+	eventMiners         map[string][]EventMiner
+	additionalNotifiers map[string]Notifier
 
 	blockProcessingLock *sync.Mutex
 	lastBlockCh         chan *database.Block
@@ -46,7 +47,21 @@ type BlockProcessor struct {
 	t *tomb.Tomb
 }
 
-func New(client *rpc.Client, db *mgo.Database) (*BlockProcessor, error) {
+type Option func(*BlockProcessor)
+
+func AddNotifier(id string, notifier Notifier) Option {
+	return func(processor *BlockProcessor) {
+		if processor.additionalNotifiers == nil {
+			processor.additionalNotifiers = map[string]Notifier{
+				id: notifier,
+			}
+		} else {
+			processor.additionalNotifiers[id] = notifier
+		}
+	}
+}
+
+func New(client *rpc.Client, db *mgo.Database, opts ...Option) (*BlockProcessor, error) {
 	// Load config from the database.
 	var config BlockProcessorConfig
 	if err := db.C("configuration").FindId("BlockProcessor").One(&config); err != nil {
@@ -91,6 +106,11 @@ func New(client *rpc.Client, db *mgo.Database) (*BlockProcessor, error) {
 		blockProcessingLock: new(sync.Mutex),
 		lastBlockCh:         make(chan *database.Block, 1),
 		t:                   new(tomb.Tomb),
+	}
+
+	// Apply the options.
+	for _, opt := range opts {
+		opt(processor)
 	}
 
 	// Start the config flusher.
@@ -505,6 +525,13 @@ func (processor *BlockProcessor) dispatchEvent(userId string, dispatch func(Noti
 		}
 
 		if err := dispatch(dispatcher, notifier.Settings); err != nil {
+			log.Printf("dispatcher %v failed: %+v", id, err)
+		}
+	}
+
+	var settings bson.Raw
+	for id, dispatcher := range processor.additionalNotifiers {
+		if err := dispatch(dispatcher, settings); err != nil {
 			log.Printf("dispatcher %v failed: %+v", id, err)
 		}
 	}

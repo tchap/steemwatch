@@ -1,0 +1,13 @@
+<div [ngClass]="classMap">
+  <div class="state">{{stateString}}</div>
+  <div *ngIf="stateString === 'DISCONNECTED'">
+    <div>
+      Reconnecting in:<br />
+      {{reconnectIntervalSeconds}} seconds
+    </div>
+    <div>
+      <a (click)="reconnect()" class="reconnect">Reconnect now!</a>
+    </div>
+  </div>
+
+</div>

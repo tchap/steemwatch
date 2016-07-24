@@ -1,0 +1,43 @@
+.event {
+  margin: auto;
+  margin-bottom: 5px;
+  border: 1px solid;
+  border-color: #DCDCDC;
+  border-left: 5px solid;
+  border-radius: 5px;
+  background-color: #FAFAFA;
+  text-align: left;
+  padding: 5px;
+}
+
+.event.ping {
+  border-left-color: #DC143C;
+}
+
+.event.account-updated {
+  border-left-color: #B0171F;
+}
+
+.event.transfer-made {
+  border-left-color: #00B2EE;
+}
+
+.event.user-mentioned {
+  border-left-color: #9370DB;
+}
+
+.event.story-published {
+  border-left-color: #00C957;
+}
+
+.event.story-voted {
+  border-left-color: #66CDAA;
+}
+
+.event.comment-published {
+  border-left-color: #FF9912;
+}
+
+.event.comment-voted {
+  border-left-color: #FFEBCD;
+}

@@ -1,0 +1,18 @@
+<div class="story-published">      
+  <span>
+    <a href="https://steemit.com/@{{model.author}}" target="_blank">
+      @{{model.author}}
+    </a>
+    has published or updated a story.
+  </span>
+  <h4>
+    <a href="https://steemit.com{{model.url}}" target="_blank">
+      {{model.title}}
+    </a>
+  </h4>
+  <div>
+    <span *ngFor="let tag of model.tags" class="tag">
+      {{tag}}
+    </span>
+  </div>
+</div>

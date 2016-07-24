@@ -1,0 +1,32 @@
+<div>
+  <a href="https://steemit.com/@{{model.voter}}" target="_blank">
+    @{{model.voter}}
+  </a>
+  cast a vote on a story by
+  <a href="https://steemit.com/@{{model.author}}" target="_blank">
+    @{{model.author}}
+  </a>
+</div>
+<div>
+  <h5>
+    <a href="https://steemit.com{{model.url}}" target="_blank">
+      {{model.title}}
+    </a>
+  </h5>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>Vote Weight</th>
+      <th>Pending Payout</th>
+      <th>Total Pending Payout</th>
+      <th>Total Payout</th>
+    </tr>
+  </thead>
+  <tr>
+    <td>{{model.voteWeight}}</td>
+    <td>{{model.pendingPayout}}</td>
+    <td>{{model.totalPendingPayout}}</td>
+    <td>{{model.totalPayout}}</td>
+  </tr>
+</table>

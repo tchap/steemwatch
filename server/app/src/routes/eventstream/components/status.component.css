@@ -1,0 +1,34 @@
+.status {
+  background-color: #F4F4F4;
+  border: 1px solid #DCDCDC;
+  border-radius: 5px;
+  padding: 5px;
+  text-align: center;
+  color: white;
+}
+
+.status.connecting {
+  background-color: #FFB90F;
+  border: #FFB90F;
+}
+
+.status.connected {
+  background-color: #00C957;
+  border: #00C957;
+}
+
+.status.closing {}
+
+.status.disconnected {
+  background-color: #DC143C;
+  border: #DC143C;
+}
+
+.state {
+  font-weight: bold;
+}
+
+.reconnect {
+  color: white;
+  text-decoration: underline;
+}

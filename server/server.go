@@ -12,6 +12,7 @@ import (
 	"github.com/tchap/steemwatch/server/context"
 	"github.com/tchap/steemwatch/server/db"
 	"github.com/tchap/steemwatch/server/routes/api/events/descendantpublished"
+	"github.com/tchap/steemwatch/server/routes/api/eventstream"
 	"github.com/tchap/steemwatch/server/routes/api/notifiers/slack"
 	"github.com/tchap/steemwatch/server/routes/api/v1/info"
 	"github.com/tchap/steemwatch/server/routes/home"
@@ -30,6 +31,8 @@ import (
 )
 
 type Context struct {
+	EventStreamManager *eventstream.Manager
+
 	listener net.Listener
 
 	t tomb.Tomb
@@ -99,6 +102,7 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 	e.GET("/home/", homeHandler)
 	e.GET("/events/", homeHandler)
 	e.GET("/notifications/", homeHandler)
+	e.GET("/eventstream/", homeHandler)
 
 	facebookCallbackPath, _ := url.Parse("/auth/facebook/callback")
 	facebookCallback := serverCtx.CanonicalURL.ResolveReference(facebookCallbackPath).String()
@@ -128,6 +132,10 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 	// API - Notifiers
 	slack.Bind(serverCtx, api.Group("/notifiers/slack"))
 
+	// API - Event Stream
+	manager := eventstream.NewManager()
+	manager.Bind(serverCtx, api.Group("/eventstream"))
+
 	// Start server
 	listener, err := net.Listen("tcp", cfg.ListenAddress)
 	if err != nil {
@@ -135,7 +143,8 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 	}
 
 	ctx := &Context{
-		listener: listener,
+		EventStreamManager: manager,
+		listener:           listener,
 	}
 
 	ctx.t.Go(func() error {

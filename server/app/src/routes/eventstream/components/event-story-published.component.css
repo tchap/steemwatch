@@ -1,0 +1,9 @@
+.tag {
+  padding: 2px 5px 2px 5px;
+  margin-top: 5px;
+  margin-left: 5px;
+  border-radius: 5px;
+  background-color: #00C957;
+  color: white;
+  font-weight: bold;
+}

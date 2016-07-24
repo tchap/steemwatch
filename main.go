@@ -54,7 +54,8 @@ func _main() error {
 	}
 
 	// Start notifications.
-	notificationsCtx, client, err := runNotifications(nDB, cfg)
+	notificationsCtx, client, err := runNotifications(nDB, cfg,
+		notifications.AddNotifier("websocket", serverCtx.EventStreamManager))
 	if err != nil {
 		return err
 	}
@@ -104,7 +105,12 @@ func _main() error {
 	return nil
 }
 
-func runNotifications(db *mgo.Database, cfg *config.Config) (*blockfetcher.Context, *rpc.Client, error) {
+func runNotifications(
+	db *mgo.Database,
+	cfg *config.Config,
+	opts ...notifications.Option,
+) (*blockfetcher.Context, *rpc.Client, error) {
+
 	if cfg.SteemdDisabled {
 		return nil, nil, nil
 	}
@@ -129,7 +135,7 @@ func runNotifications(db *mgo.Database, cfg *config.Config) (*blockfetcher.Conte
 	client := rpc.NewClient(t)
 
 	// Start the block processor.
-	ctx, err := notifications.Run(client, db)
+	ctx, err := notifications.Run(client, db, opts...)
 	if err != nil {
 		client.Close()
 		return nil, nil, err

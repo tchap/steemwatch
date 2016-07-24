@@ -6,8 +6,8 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-func Run(client *rpc.Client, db *mgo.Database) (*blockfetcher.Context, error) {
-	processor, err := New(client, db)
+func Run(client *rpc.Client, db *mgo.Database, opts ...Option) (*blockfetcher.Context, error) {
+	processor, err := New(client, db, opts...)
 	if err != nil {
 		return nil, err
 	}

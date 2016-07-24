@@ -1,0 +1,37 @@
+<div [ngClass]="classMap">
+  <div [ngSwitch]="model.kind" class="container-fluid">
+
+    <div *ngSwitchCase="'account.updated'">
+      <event-account-updated [model]="model.payload"></event-account-updated>
+    </div>
+
+    <div *ngSwitchCase="'transfer.made'">
+      <event-transfer-made [model]="model.payload"></event-transfer-made>
+    </div>
+
+    <div *ngSwitchCase="'user.mentioned'">
+      <event-user-mentioned [model]="model.payload"></event-user-mentioned>
+    </div>
+
+    <div *ngSwitchCase="'story.published'">
+      <event-story-published [model]="model.payload"></event-story-published>
+    </div>
+
+    <div *ngSwitchCase="'story.voted'">
+      <event-story-voted [model]="model.payload"></event-story-voted>
+    </div>
+
+    <div *ngSwitchCase="'comment.published'">
+      <event-comment-published [model]="model.payload"></event-comment-published>
+    </div>
+
+    <div *ngSwitchCase="'comment.voted'">
+      <event-comment-voted [model]="model.payload"></event-comment-voted>
+    </div>
+ 
+    <div *ngSwitchDefault>
+      <strong>Unknown event kind: {{model.kind}}</strong>
+    </div>
+
+  </div>
+</div>
