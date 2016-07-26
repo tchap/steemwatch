@@ -10,4 +10,8 @@ import { Component, Input } from '@angular/core';
 export class StoryPublishedEventComponent {
 
   @Input() model: any;
+
+  isRelated(account: string) : boolean {
+    return (this.model.author === account);
+  }
 }

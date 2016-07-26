@@ -10,4 +10,8 @@ import { Component, Input } from '@angular/core';
 export class TransferMadeEventComponent {
 
   @Input() model: any;
+
+  isRelated(account: string) : boolean {
+    return (this.model.from === account || this.model.to === account);
+  }
 }

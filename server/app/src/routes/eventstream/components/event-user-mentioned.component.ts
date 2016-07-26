@@ -9,4 +9,8 @@ import { Component, Input } from '@angular/core';
 export class UserMentionedEventComponent {
 
   @Input() model: any;
+
+  isRelated(account: string) : boolean {
+    return (this.model.user === account);
+  }
 }

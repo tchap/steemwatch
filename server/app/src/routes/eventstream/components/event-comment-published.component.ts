@@ -9,4 +9,8 @@ import { Component, Input } from '@angular/core';
 export class CommentPublishedEventComponent {
 
   @Input() model: any;
+
+  isRelated(account: string) : boolean {
+    return (this.model.author === account);
+  }
 }

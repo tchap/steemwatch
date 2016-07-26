@@ -6,6 +6,7 @@ import { HTTP_PROVIDERS }            from '@angular/http';
 import { CookieService } from 'angular2-cookie/core';
 
 import { ContextService, Context } from './services/context.service';
+import { ProfileService }          from './services/profile.service';
 import { MessageComponent }        from './components/index';
 import { MessageService }          from './services/index';
 
@@ -15,6 +16,7 @@ import { MessageService }          from './services/index';
   templateUrl: '/app/src/app.component.html',
   providers: [
     ContextService,
+    ProfileService,
     MessageService,
     HTTP_PROVIDERS,
     CookieService],

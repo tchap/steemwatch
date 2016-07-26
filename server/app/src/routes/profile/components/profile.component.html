@@ -1,0 +1,24 @@
+<div class="content">
+  <h1>User Profile</h1>
+
+  <p class="description">
+    On this screen you can modify various profile-related settings.
+  </p>
+
+  <div class="panel panel-info my-accounts">
+    <div class="panel-heading">
+      <div class="panel-title">
+        My Accounts
+      </div>
+    </div>
+    <div class="panel-body">
+      <p>Here you can enter the account names you control.</p>
+
+      <p>SteemWatch will try to improve your experience based on this data, e.g.
+      it will highlight the events in the event stream that are related to one
+      of your accounts.</p>
+
+      <list [path]="['profile', 'accounts']"></list>
+    </div>
+  </div>
+</div>

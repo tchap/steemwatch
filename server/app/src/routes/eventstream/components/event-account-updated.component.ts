@@ -9,4 +9,8 @@ import { Component, Input } from '@angular/core';
 export class AccountUpdatedEventComponent {
 
   @Input() model: any;
+
+  isRelated(account: string) : boolean {
+    return (this.model.account === account);
+  }
 }

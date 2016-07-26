@@ -14,6 +14,7 @@ import (
 	"github.com/tchap/steemwatch/server/routes/api/events/descendantpublished"
 	"github.com/tchap/steemwatch/server/routes/api/eventstream"
 	"github.com/tchap/steemwatch/server/routes/api/notifiers/slack"
+	"github.com/tchap/steemwatch/server/routes/api/profile"
 	"github.com/tchap/steemwatch/server/routes/api/v1/info"
 	"github.com/tchap/steemwatch/server/routes/home"
 	"github.com/tchap/steemwatch/server/routes/logout"
@@ -101,8 +102,9 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 
 	e.GET("/home/", homeHandler)
 	e.GET("/events/", homeHandler)
-	e.GET("/notifications/", homeHandler)
 	e.GET("/eventstream/", homeHandler)
+	e.GET("/notifications/", homeHandler)
+	e.GET("/profile/", homeHandler)
 
 	facebookCallbackPath, _ := url.Parse("/auth/facebook/callback")
 	facebookCallback := serverCtx.CanonicalURL.ResolveReference(facebookCallbackPath).String()
@@ -129,12 +131,15 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 	descendantpublished.Bind(serverCtx, api.Group("/events/descendant.published"))
 	db.BindList(serverCtx, api.Group("/events/:kind/:list"))
 
-	// API - Notifiers
-	slack.Bind(serverCtx, api.Group("/notifiers/slack"))
-
 	// API - Event Stream
 	manager := eventstream.NewManager()
 	manager.Bind(serverCtx, api.Group("/eventstream"))
+
+	// API - Notifiers
+	slack.Bind(serverCtx, api.Group("/notifiers/slack"))
+
+	// API - Profile
+	profile.Bind(serverCtx, api.Group("/profile"))
 
 	// Start server
 	listener, err := net.Listen("tcp", cfg.ListenAddress)

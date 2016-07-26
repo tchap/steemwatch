@@ -4,13 +4,17 @@ import { Observable } from 'rxjs/Observable';
 
 import { ReconnectingWebSocket } from '../../../common/ReconnectingWebSocket';
 
-import { MessageService } from '../../../services/index';
+import { MessageService } from '../../../services/message.service';
+import { ProfileService } from '../../../services/profile.service';
 
 import { StatusComponent } from './status.component';
 import { EventComponent }  from './event.component';
 
 import { EventStreamService } from '../services/eventstream.service';
 import { EventModel }         from '../models/event.model';
+
+
+const MAX_FEED_SIZE = 10000;
 
 
 @Component({
@@ -22,17 +26,25 @@ import { EventModel }         from '../models/event.model';
 })
 export class EventStreamComponent implements OnInit, OnDestroy {
 
-  model: EventModel[];
+  model:    EventModel[];
+  accounts: string[] = [];
 
   socket: ReconnectingWebSocket;
 
   constructor(
     private streamService: EventStreamService,
+    private profileService: ProfileService,
     private messageService: MessageService
   ) {}
 
   ngOnInit() {
     this.messageService.hideMessage();
+
+    this.profileService.getAccounts()
+      .subscribe(
+        (accounts) => this.accounts = accounts,
+        (err) => this.messageService.error(err)
+      );
 
     try {
       this.socket = this.streamService.getSocket();
@@ -46,6 +58,9 @@ export class EventStreamComponent implements OnInit, OnDestroy {
         const event = JSON.parse(ev.data);
         this.model = this.model || [];
         this.model.unshift(event);
+        if (this.model.length > MAX_FEED_SIZE) {
+          this.model = this.model.splice(0, MAX_FEED_SIZE);
+        }
       });
 
     this.socket.errors

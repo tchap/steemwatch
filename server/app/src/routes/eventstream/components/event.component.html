@@ -2,31 +2,31 @@
   <div [ngSwitch]="model.kind" class="container-fluid">
 
     <div *ngSwitchCase="'account.updated'">
-      <event-account-updated [model]="model.payload"></event-account-updated>
+      <event-account-updated [model]="model.payload" #ev></event-account-updated>
     </div>
 
     <div *ngSwitchCase="'transfer.made'">
-      <event-transfer-made [model]="model.payload"></event-transfer-made>
+      <event-transfer-made [model]="model.payload" #ev></event-transfer-made>
     </div>
 
     <div *ngSwitchCase="'user.mentioned'">
-      <event-user-mentioned [model]="model.payload"></event-user-mentioned>
+      <event-user-mentioned [model]="model.payload" #ev></event-user-mentioned>
     </div>
 
     <div *ngSwitchCase="'story.published'">
-      <event-story-published [model]="model.payload"></event-story-published>
+      <event-story-published [model]="model.payload" #ev></event-story-published>
     </div>
 
     <div *ngSwitchCase="'story.voted'">
-      <event-story-voted [model]="model.payload"></event-story-voted>
+      <event-story-voted [model]="model.payload" #ev></event-story-voted>
     </div>
 
     <div *ngSwitchCase="'comment.published'">
-      <event-comment-published [model]="model.payload"></event-comment-published>
+      <event-comment-published [model]="model.payload" #ev></event-comment-published>
     </div>
 
     <div *ngSwitchCase="'comment.voted'">
-      <event-comment-voted [model]="model.payload"></event-comment-voted>
+      <event-comment-voted [model]="model.payload" #ev></event-comment-voted>
     </div>
  
     <div *ngSwitchDefault>

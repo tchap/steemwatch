@@ -10,6 +10,10 @@
   padding: 5px;
 }
 
+.event.related {
+  background-color: #FFFFE0;
+}
+
 .event.ping {
   border-left-color: #DC143C;
 }

@@ -1,7 +1,9 @@
 import {
   Component,
   OnInit,
-  Input
+  AfterViewInit,
+  Input,
+  ViewChild
 } from '@angular/core';
 
 import {
@@ -39,7 +41,11 @@ import { CommentVotedEventComponent } from './event-comment-voted.component';
     CommentVotedEventComponent
   ]
 })
-export class EventComponent implements OnInit {
+export class EventComponent implements OnInit, AfterViewInit {
+
+  @Input() accounts: string[];
+
+  @ViewChild('ev') child;
 
   classMap = {
     'event': true
@@ -49,5 +55,11 @@ export class EventComponent implements OnInit {
 
   ngOnInit() {
     this.classMap[this.model.kind.replace('.', '-')] = true;
+  }
+
+  ngAfterViewInit() {
+    if (this.child.isRelated) {
+      this.classMap['related'] = this.accounts.some(account => this.child.isRelated(account));
+    }
   }
 }
