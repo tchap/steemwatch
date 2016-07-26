@@ -49,6 +49,14 @@ func (manager *Manager) Bind(serverCtx *context.Context, group *echo.Group) {
 				return
 			}
 
+			// Close any existing connection for the user.
+			// This is perhaps not idea, but it at least prevents leaking connections.
+			record, ok := manager.connections[user.Id]
+			if ok {
+				record.conn.Close()
+			}
+
+			// Insert the new connection record into the map.
 			manager.connections[user.Id] = &connectionRecord{conn, &sync.Mutex{}}
 			log.Println(
 				"WebSocket connection added. Number of connections:", len(manager.connections))
