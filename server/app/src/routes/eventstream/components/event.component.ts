@@ -3,7 +3,8 @@ import {
   OnInit,
   AfterViewInit,
   Input,
-  ViewChild
+  ViewChild,
+  ChangeDetectorRef
 } from '@angular/core';
 
 import {
@@ -53,13 +54,22 @@ export class EventComponent implements OnInit, AfterViewInit {
 
   @Input() model: EventModel;
 
+  constructor(
+    private ref: ChangeDetectorRef
+  ) {}
+
   ngOnInit() {
     this.classMap[this.model.kind.replace('.', '-')] = true;
   }
 
   ngAfterViewInit() {
     if (this.child.isRelated) {
-      this.classMap['related'] = this.accounts.some(account => this.child.isRelated(account));
+      const related = this.accounts.some(account => this.child.isRelated(account));
+      this.classMap['related'] = related;
+      if (related) {
+        // XXX: Not sure setTimeout is necessary.
+        setTimeout(() => this.ref.detectChanges(), 0);
+      }
     }
   }
 }
