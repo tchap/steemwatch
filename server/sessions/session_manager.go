@@ -62,7 +62,7 @@ func (manager *SessionManager) GetProfile(ctx echo.Context) (*users.User, error)
 	// Decode the cookie value.
 	var session string
 	if err := manager.cookie.Decode(SessionCookieName, cookieValue, &session); err != nil {
-		if err == securecookie.ErrMacInvalid {
+		if ex, ok := err.(securecookie.Error); ok && ex.IsDecode() {
 			manager.ClearProfile(ctx)
 			return nil, nil
 		} else {
