@@ -92,7 +92,7 @@ func Bind(serverCtx *context.Context, root *echo.Group) {
 
 		var doc Document
 		if err := json.NewDecoder(ctx.Request().Body()).Decode(&doc); err != nil {
-			return errors.Wrap(err, "failed to redoce request body")
+			return errors.Wrap(err, "failed to decode request body")
 		}
 
 		selector := bson.M{

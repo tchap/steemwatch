@@ -1,0 +1,60 @@
+<div>
+  <hr />
+  <h2><img src="/assets/img/steem-logo-128x128.png" class="logo"> Steemit Chat</h2>
+
+  <p>
+    This integration can be used to send direct messages to your account on
+    <a href="https://steemit.chat" target="_blank">Steemit Chat</a>.
+  </p>
+
+  <div *ngIf="!model">
+    <img src="/assets/img/loading.gif" />
+  </div>
+
+  <div *ngIf="model">
+    <div *ngIf="model.settings.username">
+      <p>Connected as <strong>@{{model.settings.username}}</strong>.</p>
+      <div class="buttons">
+        <button *ngIf="model.enabled" class="btn btn-warning" (click)="setEnabled(false)">
+          Disable
+        </button>
+        <span *ngIf="!model.enabled">
+          <button class="btn btn-success" (click)="setEnabled(true)">
+            Enable
+          </button>
+          <button class="btn btn-warning" (click)="disconnect()">
+            Disconnect
+          </button>
+        </span>
+
+        <span class="api-error-wrapper" *ngIf="errorMessage">
+          <span class="api-error">
+            Error: {{errorMessage}}
+          </span>
+        </span>
+        <img *ngIf="processing"
+          src="/assets/img/loading.gif"
+          class="loading-small" />
+      </div>
+    </div>
+
+    <div *ngIf="!model.settings.username" class="buttons">
+      <button *ngIf="!model.settings.username" class="btn btn-success"
+              data-toggle="modal" data-target="#steemitChatConnectModal">
+
+        Enable
+      </button>
+
+      <span class="api-error-wrapper" *ngIf="errorMessage">
+        <span class="api-error">
+          Error: {{errorMessage}}
+        </span>
+      </span>
+      <img *ngIf="processing"
+        src="/assets/img/loading.gif"
+        class="loading-small" />
+    </div>
+  </div>
+
+  <steemit-chat-modal [onConnected]="onConnected"></steemit-chat-modal>
+<div>

@@ -8,7 +8,8 @@ export interface User {
 
 export interface Context {
   canonicalURL: string;
-  user: User;
+  env:          string;
+  user:         User;
 }
 
 declare var ctx: Context;

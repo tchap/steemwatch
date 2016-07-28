@@ -14,6 +14,7 @@ import (
 	"github.com/tchap/steemwatch/server/routes/api/events/descendantpublished"
 	"github.com/tchap/steemwatch/server/routes/api/eventstream"
 	"github.com/tchap/steemwatch/server/routes/api/notifiers/slack"
+	"github.com/tchap/steemwatch/server/routes/api/notifiers/steemitchat"
 	"github.com/tchap/steemwatch/server/routes/api/profile"
 	"github.com/tchap/steemwatch/server/routes/api/v1/info"
 	"github.com/tchap/steemwatch/server/routes/home"
@@ -147,6 +148,7 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 
 	// API - Notifiers
 	slack.Bind(serverCtx, api.Group("/notifiers/slack"))
+	steemitchat.Bind(serverCtx, api.Group("/notifiers/steemit-chat"))
 
 	// API - Profile
 	profile.Bind(serverCtx, api.Group("/profile"))

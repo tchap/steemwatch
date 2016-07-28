@@ -1,4 +1,4 @@
-import { enabledProdMode }                      from '@angular/core';
+import { enableProdMode }                      from '@angular/core';
 import { bootstrap }                            from '@angular/platform-browser-dynamic';
 import { disableDeprecatedForms, provideForms } from '@angular/forms';
 
@@ -12,7 +12,7 @@ declare var ctx: Context;
 
 if (ctx.env !== 'development') {
   console.log(`Environment is set to '${ctx.env}', enabling Angular 2 production mode...`);
-  enabledProdMode();
+  enableProdMode();
 } else {
   console.log(`Environment is set to '${ctx.env}', staying in Angular 2 development mode...`);
 }

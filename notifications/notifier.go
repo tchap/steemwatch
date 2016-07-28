@@ -2,15 +2,33 @@ package notifications
 
 import (
 	"io"
+	"os"
 
 	"github.com/tchap/steemwatch/notifications/events"
 	"github.com/tchap/steemwatch/notifications/notifiers/slack"
+	"github.com/tchap/steemwatch/notifications/notifiers/steemitchat"
 
 	"gopkg.in/mgo.v2/bson"
 )
 
 var availableNotifiers = map[string]Notifier{
 	"slack": slack.NewNotifier(),
+}
+
+// XXX: Ugly. Would be better to pass the values directly somehow.
+func init() {
+	mustGetenv := func(key string) string {
+		v := os.Getenv(key)
+		if v == "" {
+			panic(key + " is not set")
+		}
+		return v
+	}
+
+	userID := mustGetenv("STEEMWATCH_STEEMIT_CHAT_USER_ID")
+	authToken := mustGetenv("STEEMWATCH_STEEMIT_CHAT_AUTH_TOKEN")
+
+	availableNotifiers["steemit-chat"] = steemitchat.NewNotifier(userID, authToken)
 }
 
 type Notifier interface {
