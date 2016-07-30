@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 
 import {
   REACTIVE_FORM_DIRECTIVES,
@@ -20,7 +20,10 @@ import { SteemitChatService } from '../services/steemit-chat.service';
 })
 export class SteemitChatModalComponent implements OnInit {
 
+  @ViewChild('closeButton') closeButton;
+
   model = {username: '', password: ''};
+  saving: boolean;
 
   form: FormGroup;
 
@@ -30,4 +33,11 @@ export class SteemitChatModalComponent implements OnInit {
   ) {}
 
   ngOnInit() {}
+
+  private closeModal() : void {
+    setTimeout(() => {
+      const evt = new MouseEvent('click', {bubbles: true});
+      this.closeButton.nativeElement.dispatchEvent(evt);
+    }, 0);
+  }
 }
