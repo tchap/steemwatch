@@ -2,11 +2,22 @@
   <hr />
   <h2><img src="/assets/img/steem-logo-128x128.png" class="logo"> Steemit Chat</h2>
 
+  <p>
+    This integration can be used to send direct messages to your account on
+    <a href="https://steemit.chat" target="_blank">Steemit Chat</a>.
+  </p>
+
   <div *ngIf="!model">
     <img src="/assets/img/loading.gif" />
   </div>
-  <div *ngIf="model">
-    Model
+
+  <div *ngIf="model" class="buttons">
+    <button *ngIf="!model.username" class="btn btn-success" (click)="enable()">
+      Enable
+    </button>
   </div>
 
+  <div *ngIf="errorMessage" class="api-error">
+    Error: {{errorMessage}}
+  </div>
 <div>
