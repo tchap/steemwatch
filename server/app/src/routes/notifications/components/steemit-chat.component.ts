@@ -3,12 +3,15 @@ import { Component, OnInit } from '@angular/core';
 import { SteemitChatService } from '../services/steemit-chat.service';
 import { SteemitChatModel }   from '../models/steemit-chat.model';
 
+import { SteemitChatModalComponent } from './steemit-chat-modal.component';
+
 
 @Component({
   moduleId: module.id,
   selector: 'steemit-chat',
   templateUrl: 'steemit-chat.component.html',
   styleUrls: ['steemit-chat.component.css'],
+  directives: [SteemitChatModalComponent],
   providers: [SteemitChatService]
 })
 export class SteemitChatComponent implements OnInit {

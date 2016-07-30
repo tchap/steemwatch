@@ -12,10 +12,14 @@
   </div>
 
   <div *ngIf="model" class="buttons">
-    <button *ngIf="!model.username" class="btn btn-success" (click)="enable()">
+    <button *ngIf="!model.username" class="btn btn-success"
+            data-toggle="modal" data-target="#steemitChatConnectModal">
+
       Enable
     </button>
   </div>
+
+  <steemit-chat-modal></steemit-chat-modal>
 
   <div *ngIf="errorMessage" class="api-error">
     Error: {{errorMessage}}
