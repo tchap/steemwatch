@@ -10,7 +10,7 @@
           <span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="myModalLabel">Connect to Steemit Chat</h4>
       </div>
-      <form (ngSubmit)="onSubmit()" class="form-horizontal" #form>
+      <form (ngSubmit)="onSubmit()" class="form-horizontal" #form="ngForm">
         <div class="modal-body">
 
           <p>Please insert your Steemit Chat username and password.</p>
