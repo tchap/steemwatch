@@ -97,7 +97,7 @@ export class SteemitChatModalComponent {
   private onError(err) : void {
     this.processing = false;
     this.errorMessage = (err.status ?
-                         `Error: ${err.status} ${err.text()}` :
-                         `Error: ${err.message || err}`);
+                         `${err.status} ${err.text()}` :
+                         `${err.message || err}`);
   }
 }
