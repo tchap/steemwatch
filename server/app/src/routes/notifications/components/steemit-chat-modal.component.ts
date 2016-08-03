@@ -49,7 +49,6 @@ export class SteemitChatModalComponent {
         (creds) => this.chatService.store(username, creds)
           .subscribe(
             () => {
-              this.processing = false;
               this.onSuccess({
                 username:  username,
                 userID:    creds.userID,
@@ -60,11 +59,9 @@ export class SteemitChatModalComponent {
               this.chatService.logoff(creds)
                 .subscribe(
                   () => {
-                    this.processing = false;
                     this.onError(err);
                   },
                   (ex) => {
-                    this.processing = false;
                     this.onError(err);
                     console.error(ex);
                   }
@@ -87,6 +84,8 @@ export class SteemitChatModalComponent {
   }
 
   private onSuccess(settings: SteemitChatSettings) : void {
+    this.processing = false;
+
     this.closeModal();
     this.resetModel();
 
@@ -96,6 +95,7 @@ export class SteemitChatModalComponent {
   }
 
   private onError(err) : void {
+    this.processing = false;
     this.errorMessage = (err.status ?
                          `Error: ${err.status} ${err.text()}` :
                          `Error: ${err.message || err}`);
