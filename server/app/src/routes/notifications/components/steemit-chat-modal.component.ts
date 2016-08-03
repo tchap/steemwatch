@@ -7,7 +7,8 @@ import {
   FormBuilder
 } from '@angular/forms';
 
-import { SteemitChatService } from '../services/steemit-chat.service';
+import { SteemitChatService }  from '../services/steemit-chat.service';
+import { SteemitChatSettings } from '../models/steemit-chat.model';
 
 
 @Component({
@@ -20,7 +21,7 @@ import { SteemitChatService } from '../services/steemit-chat.service';
 })
 export class SteemitChatModalComponent {
 
-  @Input() onConnected: (username: string) => void;
+  @Input() onConnected: (settings: SteemitChatSettings) => void;
 
   @ViewChild('closeButton') closeButton;
 
@@ -49,7 +50,11 @@ export class SteemitChatModalComponent {
           .subscribe(
             () => {
               this.processing = false;
-              this.onSuccess(username);
+              this.onSuccess({
+                username:  username,
+                userID:    creds.userID,
+                authToken: creds.authToken
+              });
             },
             (err) => {
               this.chatService.logoff(creds)
@@ -81,12 +86,12 @@ export class SteemitChatModalComponent {
     this.model = {username: '', password: ''};
   }
 
-  private onSuccess(username: string) : void {
+  private onSuccess(settings: SteemitChatSettings) : void {
     this.closeModal();
     this.resetModel();
 
     if (this.onConnected) {
-      this.onConnected(username);
+      this.onConnected(settings);
     }
   }
 
