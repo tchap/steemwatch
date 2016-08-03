@@ -42,6 +42,23 @@ export class SteemitChatService {
       })
   }
 
+  store(username: string, creds: Credentials) : Observable<Response> {
+    const url = '/api/notifiers/steemit-chat/connect';
+
+    const headers = new Headers({
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': this.cookies.get('csrf')
+    });
+
+    const body = JSON.stringify({
+      username,
+      userID:    creds.userID,
+      authToken: creds.authToken
+    });
+
+    return this.http.post(url, body, {headers});
+  }
+
   logon(username: string, password: string) : Observable<Credentials> {
     const url = `${STEEMIT_CHAT_BASE_URL}/api/login`;
 
