@@ -41,18 +41,18 @@
         </div>
 
         <div class="modal-footer">
-          <span class="api-error-wrapper" *ngIf="saveErrorMessage">
+          <span class="api-error-wrapper" *ngIf="errorMessage">
             <span class="api-error">
-              Error: {{saveErrorMessage}}
+              Error: {{errorMessage}}
             </span>
           </span>
-          <img *ngIf="saving" 
+          <img *ngIf="processing" 
             src="/assets/img/loading.gif"
             class="loading-small" />
           <button type="button" class="btn btn-default" data-dismiss="modal"
-            [disabled]="saving" #closeButton>Close</button>
+            [disabled]="processing" #closeButton>Close</button>
           <button type="submit" class="btn btn-success"
-            [disabled]="!form.valid || saving">Connect</button>
+            [disabled]="!form.valid || processing">Connect</button>
         </div>
       </form>
     </div>

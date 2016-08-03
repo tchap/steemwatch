@@ -12,6 +12,21 @@
   </div>
 
   <div *ngIf="model" class="buttons">
+    <div *ngIf="model.username">
+      <p>Connected as <strong>@{{model.username}}</strong></p>
+      <button *ngIf="model.enabled" class="btn btn-warning">
+        Disable
+      </button>
+      <div *ngIf="!model.enabled">
+        <button class="btn btn-success">
+          Enable
+        </button>
+        <button class="btn btn-warning">
+          Disconnect
+        </button>
+      </div>
+    </div>
+
     <button *ngIf="!model.username" class="btn btn-success"
             data-toggle="modal" data-target="#steemitChatConnectModal">
 
