@@ -19,7 +19,7 @@
     </button>
   </div>
 
-  <steemit-chat-modal></steemit-chat-modal>
+  <steemit-chat-modal [onConnected]="onConnected"></steemit-chat-modal>
 
   <div *ngIf="errorMessage" class="api-error">
     Error: {{errorMessage}}

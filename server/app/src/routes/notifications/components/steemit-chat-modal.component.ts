@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 
 import {
   REACTIVE_FORM_DIRECTIVES,
@@ -20,10 +20,14 @@ import { SteemitChatService } from '../services/steemit-chat.service';
 })
 export class SteemitChatModalComponent {
 
+  @Input() onConnected: (username: string) => void;
+
   @ViewChild('closeButton') closeButton;
 
   model = {username: '', password: ''};
-  saving: boolean;
+
+  processing:   boolean;
+  errorMessage: string;
 
   form: FormGroup;
 
@@ -33,8 +37,37 @@ export class SteemitChatModalComponent {
   ) {}
 
   onSubmit() {
-    this.closeModal();
-    this.resetModel();
+    this.processing = true;
+    this.errorMessage = null;
+
+    const username = this.model.username;
+    const password = this.model.password;
+
+    this.chatService.logon(username, password)
+      .subscribe(
+        (creds) => this.chatService.store(username, creds)
+          .subscribe(
+            () => {
+              this.processing = false;
+              this.onSuccess(username);
+            },
+            (err) => {
+              this.chatService.logoff(creds)
+                .subscribe(
+                  () => {
+                    this.processing = false;
+                    this.onError(err);
+                  },
+                  (ex) => {
+                    this.processing = false;
+                    this.onError(err);
+                    console.error(ex);
+                  }
+                );
+            }
+          ),
+        (err) => this.onError(err)
+      );
   }
 
   private closeModal() : void {
@@ -46,5 +79,20 @@ export class SteemitChatModalComponent {
 
   private resetModel() : void {
     this.model = {username: '', password: ''};
+  }
+
+  private onSuccess(username: string) : void {
+    this.closeModal();
+    this.resetModel();
+
+    if (this.onConnected) {
+      this.onConnected(username);
+    }
+  }
+
+  private onError(err) : void {
+    this.errorMessage = (err.status ?
+                         `Error: ${err.status} ${err.text()}` :
+                         `Error: ${err.message || err}`);
   }
 }
