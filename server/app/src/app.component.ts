@@ -1,9 +1,11 @@
-import { Component, OnInit }         from '@angular/core';
-import { Location }                  from '@angular/common';
-import { Router, ROUTER_DIRECTIVES } from '@angular/router';
-import { HTTP_PROVIDERS }            from '@angular/http';
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { Location }                            from '@angular/common';
+import { Router, ROUTER_DIRECTIVES }           from '@angular/router';
+import { HTTP_PROVIDERS }                      from '@angular/http';
 
 import { CookieService } from 'angular2-cookie/core';
+
+import { Modal, BS_MODAL_PROVIDERS } from 'angular2-modal/plugins/bootstrap';
 
 import { APP_ROUTE_COMPONENTS } from './app.routes';
 
@@ -24,6 +26,7 @@ import { MessageService }          from './services/index';
     HTTP_PROVIDERS,
     CookieService
   ],
+  viewProviders: [...BS_MODAL_PROVIDERS],
   precompile: APP_ROUTE_COMPONENTS
 })
 export class AppComponent implements OnInit {
@@ -33,9 +36,12 @@ export class AppComponent implements OnInit {
   constructor(
     private router: Router,
     private location: Location,
-    private contextService: ContextService
+    private contextService: ContextService,
+    private modal: Modal,
+    private viewContainer: ViewContainerRef
   ) {
     this.ctx = contextService.getContext();
+    modal.defaultViewContainer = viewContainer;
   }
 
   ngOnInit() {
