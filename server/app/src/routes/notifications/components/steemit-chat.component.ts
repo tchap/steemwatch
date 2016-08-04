@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 
 import { SteemitChatService }                    from '../services/steemit-chat.service';
 import { SteemitChatSettings, SteemitChatModel } from '../models/steemit-chat.model';
@@ -16,6 +16,8 @@ import { SteemitChatModalComponent } from './steemit-chat-modal.component';
 })
 export class SteemitChatComponent implements OnInit {
 
+  @ViewChild('modal') modal;
+
   model: SteemitChatModel;
 
   errorMessage: string;
@@ -30,6 +32,10 @@ export class SteemitChatComponent implements OnInit {
         (model) => this.model = model,
         (err) => this.errorMessage = `Error: ${err.message || err}`
       );
+  }
+
+  openDialog() : void {
+    console.log(this.modal.open());
   }
 
   onConnected(settings: SteemitChatSettings) : void {

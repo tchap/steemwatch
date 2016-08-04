@@ -8,14 +8,18 @@
     'app':                        'app', // 'dist',
     '@angular':                   'modules/@angular',
     'rxjs':                       'modules/rxjs',
-    'angular2-cookie':            'modules/angular2-cookie'
+    'angular2-cookie':            'modules/angular2-cookie',
+    'angular2-modal':             'modules/angular2-modal'
   };
   // packages tells the System loader how to load when no filename and/or no extension
   var packages = {
     'app':                        { main: 'src/main.js',  defaultExtension: 'js' },
     'rxjs':                       { defaultExtension: 'js' },
     '@angular/router':            { main: 'index.js', defaultExtension: 'js' },
-    'angular2-cookie':            { main: 'core.js',  defaultExtension: 'js' }
+    'angular2-cookie':            { main: 'core.js',  defaultExtension: 'js' },
+    'angular2-modal':             { main: 'index.js', defaultExtension: 'js' },
+    'angular2-modal/platform-browser':  { main: 'index.js', defaultExtension: 'js' },
+    'angular2-modal/plugins/bootstrap': { main: 'index.js', defaultExtension: 'js' }
   };
   var ngPackageNames = [
     'common',

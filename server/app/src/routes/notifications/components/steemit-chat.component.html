@@ -27,14 +27,12 @@
       </div>
     </div>
 
-    <button *ngIf="!model.username" class="btn btn-success"
-            data-toggle="modal" data-target="#steemitChatConnectModal">
-
+    <button *ngIf="!model.username" class="btn btn-success" (click)="openDialog()">
       Enable
     </button>
   </div>
 
-  <steemit-chat-modal [onConnected]="onConnected"></steemit-chat-modal>
+  <steemit-chat-modal [onConnected]="onConnected" #modal></steemit-chat-modal>
 
   <div *ngIf="errorMessage" class="api-error">
     Error: {{errorMessage}}

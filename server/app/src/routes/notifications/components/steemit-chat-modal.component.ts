@@ -1,5 +1,7 @@
 import { Component, Input, ViewChild } from '@angular/core';
 
+import { HTTP_PROVIDERS } from '@angular/http';
+
 import {
   REACTIVE_FORM_DIRECTIVES,
   FormGroup,
@@ -7,21 +9,21 @@ import {
   FormBuilder
 } from '@angular/forms';
 
+import { Modal } from 'angular2-modal';
+
 import { SteemitChatService }  from '../services/steemit-chat.service';
 import { SteemitChatSettings } from '../models/steemit-chat.model';
 
 
 @Component({
   moduleId: module.id,
-  selector: 'steemit-chat-modal',
+  selector: 'steemit-chat-modal-body',
   templateUrl: 'steemit-chat-modal.component.html',
   styleUrls: ['steemit-chat-modal.component.css'],
   directives: [REACTIVE_FORM_DIRECTIVES],
-  providers: [SteemitChatService]
+  providers: [HTTP_PROVIDERS, SteemitChatService]
 })
-export class SteemitChatModalComponent {
-
-  @Input() onConnected: (settings: SteemitChatSettings) => void;
+class SteemitChatModalWindow {
 
   @ViewChild('closeButton') closeButton;
 
@@ -85,20 +87,34 @@ export class SteemitChatModalComponent {
 
   private onSuccess(settings: SteemitChatSettings) : void {
     this.processing = false;
-
     this.closeModal();
     this.resetModel();
-
-    if (this.onConnected) {
-      this.onConnected(settings);
-    }
   }
 
   private onError(err) : void {
     this.processing = false;
-    console.log(err);
     this.errorMessage = (err.status ?
                          `${err.status} ${err.text()}` :
                          `${err.message || err}`);
+  }
+}
+
+
+@Component({
+  moduleId: module.id,
+  selector: 'steemit-chat-modal',
+  template: '<div class="modal"></div>',
+  directives: [SteemitChatModalWindow]
+})
+export class SteemitChatModalComponent {
+
+  @Input() onConnected: (settings: SteemitChatSettings) => void;
+
+  constructor(
+    private modal: Modal
+  ) {}
+
+  open() {
+    return this.modal.open(SteemitChatModalWindow);
   }
 }
