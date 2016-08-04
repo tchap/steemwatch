@@ -15,6 +15,14 @@ export const routes: RouterConfig = [
   {path: 'profile',       component:  ProfileComponent}
 ];
 
+export const APP_ROUTE_COMPONENTS = [
+  HomeComponent,
+  EventsComponent,
+  EventStreamComponent,
+  NotificationsComponent,
+  ProfileComponent
+];
+
 export const APP_ROUTER_PROVIDERS = [
   provideRouter(routes)
 ];

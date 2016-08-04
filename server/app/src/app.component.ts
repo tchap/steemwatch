@@ -5,6 +5,8 @@ import { HTTP_PROVIDERS }            from '@angular/http';
 
 import { CookieService } from 'angular2-cookie/core';
 
+import { APP_ROUTE_COMPONENTS } from './app.routes';
+
 import { ContextService, Context } from './services/context.service';
 import { ProfileService }          from './services/profile.service';
 import { MessageComponent }        from './components/index';
@@ -14,13 +16,15 @@ import { MessageService }          from './services/index';
 @Component({
   selector: 'app',
   templateUrl: '/app/src/app.component.html',
+  directives: [ROUTER_DIRECTIVES, MessageComponent],
   providers: [
     ContextService,
     ProfileService,
     MessageService,
     HTTP_PROVIDERS,
-    CookieService],
-  directives: [ROUTER_DIRECTIVES, MessageComponent]
+    CookieService
+  ],
+  precompile: APP_ROUTE_COMPONENTS
 })
 export class AppComponent implements OnInit {
 
