@@ -94,10 +94,6 @@ func renderTransferMadeEvent(event *events.TransferMade) (*Payload, error) {
 				Value: op.Amount,
 				Short: true,
 			},
-			{
-				Title: "Memo",
-				Value: op.Memo,
-			},
 		},
 	}
 	if op.Memo != "" {
