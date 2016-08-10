@@ -11,6 +11,6 @@ export class CommentPublishedEventComponent {
   @Input() model: any;
 
   isRelated(account: string) : boolean {
-    return (this.model.author === account);
+    return (this.model.author === account || this.model.parentAuthor === account);
   }
 }
