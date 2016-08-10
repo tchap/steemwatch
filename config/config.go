@@ -6,6 +6,8 @@ import (
 )
 
 type Config struct {
+	Env string `envconfig:"ENVIRONMENT" default:"development"`
+
 	ListenAddress string `envconfig:"LISTEN_ADDRESS" default:"127.0.0.1:8080"`
 	CanonicalURL  string `envconfig:"CANONICAL_URL"  default:"http://localhost:8080"`
 

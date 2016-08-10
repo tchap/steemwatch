@@ -42,6 +42,16 @@ type Context struct {
 func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 	serverCtx := &context.Context{}
 
+	// Environment.
+	switch cfg.Env {
+	case "development":
+		serverCtx.Env = context.EnvironmentDevelopment
+	case "production":
+		serverCtx.Env = context.EnvironmentProduction
+	default:
+		return nil, errors.New("invalid environment: " + cfg.Env)
+	}
+
 	// Database.
 	serverCtx.DB = mongo
 

@@ -32,6 +32,7 @@ func (handler *Handler) HandlerFunc(ctx echo.Context) error {
 		templateName = "welcome.html"
 	} else {
 		templateName = "app.html"
+		templateCtx.Environment = string(handler.ctx.Env)
 		templateCtx.UserId = profile.Id
 		templateCtx.UserEmail = profile.Email
 	}

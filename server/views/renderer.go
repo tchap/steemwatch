@@ -10,6 +10,7 @@ import (
 
 type PageContext struct {
 	CanonicalURL *url.URL
+	Environment  string
 	UserId       string
 	UserEmail    string
 }
