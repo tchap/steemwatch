@@ -35,6 +35,12 @@ func (handler *Handler) HandlerFunc(ctx echo.Context) error {
 		templateCtx.Environment = string(handler.ctx.Env)
 		templateCtx.UserId = profile.Id
 		templateCtx.UserEmail = profile.Email
+		templateCtx.UserDisplayName = profile.Email
+
+		for k, v := range profile.SocialLinks {
+			templateCtx.UserDisplayName = v.UserName + "@" + k
+			break
+		}
 	}
 
 	return ctx.Render(http.StatusOK, templateName, templateCtx)

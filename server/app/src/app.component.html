@@ -10,7 +10,7 @@
         <li><a [routerLink]="['/eventstream']">Event Stream</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><a [routerLink]="['/profile']">{{ctx.user.email}}</a></li>
+        <li><a [routerLink]="['/profile']">{{ctx.user.displayName}}</a></li>
         <li><button class="btn btn-info btn-logout" (click)="logout()">Logout</button></li>
       </ul>
     </div>

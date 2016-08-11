@@ -14,6 +14,9 @@ type Config struct {
 	FacebookClientId     string `envconfig:"FACEBOOK_CLIENT_ID"     required:"true"`
 	FacebookClientSecret string `envconfig:"FACEBOOK_CLIENT_SECRET" required:"true"`
 
+	RedditClientId     string `envconfig:"REDDIT_CLIENT_ID"     required:"true"`
+	RedditClientSecret string `envconfig:"REDDIT_CLIENT_SECRET" required:"true"`
+
 	GoogleClientId     string `envconfig:"GOOGLE_CLIENT_ID"     required:"true"`
 	GoogleClientSecret string `envconfig:"GOOGLE_CLIENT_SECRET" required:"true"`
 

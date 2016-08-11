@@ -9,6 +9,7 @@ import (
 	"github.com/tchap/steemwatch/server/auth/facebook"
 	"github.com/tchap/steemwatch/server/auth/github"
 	"github.com/tchap/steemwatch/server/auth/google"
+	"github.com/tchap/steemwatch/server/auth/reddit"
 	"github.com/tchap/steemwatch/server/context"
 	"github.com/tchap/steemwatch/server/db"
 	"github.com/tchap/steemwatch/server/routes/api/events/descendantpublished"
@@ -49,6 +50,7 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 		serverCtx.Env = context.EnvironmentDevelopment
 	case "production":
 		serverCtx.Env = context.EnvironmentProduction
+		serverCtx.SSLEnabled = true
 	default:
 		return nil, errors.New("invalid environment: " + cfg.Env)
 	}
@@ -119,17 +121,26 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 
 	facebookCallbackPath, _ := url.Parse("/auth/facebook/callback")
 	facebookCallback := serverCtx.CanonicalURL.ResolveReference(facebookCallbackPath).String()
-	facebookAuth := facebook.NewAuthenticator(cfg.FacebookClientId, cfg.FacebookClientSecret, facebookCallback)
+	facebookAuth := facebook.NewAuthenticator(
+		cfg.FacebookClientId, cfg.FacebookClientSecret, facebookCallback)
 	auth.Bind(serverCtx, e.Group("/auth/facebook"), facebookAuth)
+
+	redditCallbackPath, _ := url.Parse("/auth/reddit/callback")
+	redditCallback := serverCtx.CanonicalURL.ResolveReference(redditCallbackPath).String()
+	redditAuth := reddit.NewAuthenticator(
+		cfg.RedditClientId, cfg.RedditClientSecret, redditCallback, serverCtx.SSLEnabled)
+	auth.Bind(serverCtx, e.Group("/auth/reddit"), redditAuth)
 
 	googleCallbackPath, _ := url.Parse("/auth/google/callback")
 	googleCallback := serverCtx.CanonicalURL.ResolveReference(googleCallbackPath).String()
-	googleAuth := google.NewAuthenticator(cfg.GoogleClientId, cfg.GoogleClientSecret, googleCallback)
+	googleAuth := google.NewAuthenticator(
+		cfg.GoogleClientId, cfg.GoogleClientSecret, googleCallback)
 	auth.Bind(serverCtx, e.Group("/auth/google"), googleAuth)
 
 	githubCallbackPath, _ := url.Parse("/auth/github/callback")
 	githubCallback := serverCtx.CanonicalURL.ResolveReference(githubCallbackPath).String()
-	githubAuth := github.NewAuthenticator(cfg.GitHubClientId, cfg.GitHubClientSecret, githubCallback)
+	githubAuth := github.NewAuthenticator(
+		cfg.GitHubClientId, cfg.GitHubClientSecret, githubCallback)
 	auth.Bind(serverCtx, e.Group("/auth/github"), githubAuth)
 
 	// Public API
