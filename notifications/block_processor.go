@@ -139,10 +139,12 @@ func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
 			switch body := op.Body.(type) {
 			case *database.CommentOperation:
 				content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
-				err = errors.Wrapf(err, "failed to get content: @%v/%v", body.Author, body.Permlink)
+				err = errors.Wrapf(err, "block %v: failed to get content: @%v/%v",
+					block.Number, body.Author, body.Permlink)
 			case *database.VoteOperation:
 				content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
-				err = errors.Wrapf(err, "failed to get content: @%v/%v", body.Author, body.Permlink)
+				err = errors.Wrapf(err, "block %v: failed to get content: @%v/%v",
+					block.Number, body.Author, body.Permlink)
 			}
 			if err != nil {
 				return err
@@ -157,7 +159,7 @@ func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
 			for _, eventMiner := range miners {
 				for _, event := range eventMiner.MineEvent(op, content) {
 					if err := processor.handleEvent(event); err != nil {
-						return err
+						return errors.Wrapf(err, "block %v: %v", block.Number, err.Error())
 					}
 				}
 			}
