@@ -139,11 +139,13 @@ func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
 			switch body := op.Body.(type) {
 			case *database.CommentOperation:
 				content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
+				err = errors.Wrapf(err, "failed to get content: @%v/%v", body.Author, body.Permlink)
 			case *database.VoteOperation:
 				content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
+				err = errors.Wrapf(err, "failed to get content: @%v/%v", body.Author, body.Permlink)
 			}
 			if err != nil {
-				return errors.Wrap(err, "failed to get content")
+				return err
 			}
 
 			// Get miners associated with the given operation.
