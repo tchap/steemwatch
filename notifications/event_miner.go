@@ -5,5 +5,5 @@ import (
 )
 
 type EventMiner interface {
-	MineEvent(*database.Operation, *database.Content) (events []interface{})
+	MineEvent(*database.Operation, *database.Content) (events []interface{}, err error)
 }

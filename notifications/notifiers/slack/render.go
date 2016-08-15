@@ -118,6 +118,26 @@ func renderUserMentionedEvent(event *events.UserMentioned) (*Payload, error) {
 	}, nil
 }
 
+// UserFollowStatusChanged
+
+func renderUserFollowStatusChangedEvent(event *events.UserFollowStatusChanged) (*Payload, error) {
+	op := event.Op
+
+	var txt string
+	switch {
+	case event.Followed():
+		txt = fmt.Sprintf("@%v started following @%v.", op.Follower, op.Following)
+	case event.Muted():
+		txt = fmt.Sprintf("@%v muted @%v.", op.Follower, op.Following)
+	case event.Reset():
+		txt = fmt.Sprintf("@%v reset the follow status for @%v.", op.Follower, op.Following)
+	}
+
+	return &Payload{
+		Text: txt,
+	}, nil
+}
+
 // StoryPublished
 
 func renderStoryPublishedEvent(event *events.StoryPublished) (*Payload, error) {

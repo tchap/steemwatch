@@ -54,6 +54,18 @@ const events : Event[] = [
     ]
   },
   {
+    id:          "user.follow_changed",
+    title:       "User Follow Status Changed",
+    description: "A user was followed/muted/unfollowed/unmuted by another user.",
+    fields:      [
+      {
+        id:          "users",
+        label:       "Users",
+        description: "You will be notified when the follow status changes for any of the following users."
+      },
+    ]
+  },
+  {
     id:          "story.published",
     title:       "Story Published",
     description: "A story was published",

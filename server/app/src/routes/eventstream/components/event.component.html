@@ -13,6 +13,10 @@
       <event-user-mentioned [model]="model.payload" #ev></event-user-mentioned>
     </div>
 
+    <div *ngSwitchCase="'user.follow_changed'">
+      <event-user-follow-status-changed [model]="model.payload" #ev></event-user-follow-status-changed>
+    </div>
+
     <div *ngSwitchCase="'story.published'">
       <event-story-published [model]="model.payload" #ev></event-story-published>
     </div>

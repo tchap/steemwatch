@@ -30,6 +30,10 @@
   border-left-color: #9370DB;
 }
 
+.event.user-follow_changed {
+  border-left-color: #8B8B83;
+}
+
 .event.story-published {
   border-left-color: #00C957;
 }

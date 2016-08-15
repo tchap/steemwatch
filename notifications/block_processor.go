@@ -95,6 +95,9 @@ func New(client *rpc.Client, db *mgo.Database, opts ...Option) (*BlockProcessor,
 			events.NewStoryVotedEventMiner(),
 			events.NewCommentVotedEventMiner(),
 		},
+		database.OpTypeCustomJSON: []EventMiner{
+			events.NewUserFollowStatusChangedEventMiner(),
+		},
 	}
 
 	// Create a new BlockProcessor instance.
@@ -157,10 +160,17 @@ func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
 			}
 			// Mine events and handle them.
 			for _, eventMiner := range miners {
-				for _, event := range eventMiner.MineEvent(op, content) {
-					if err := processor.handleEvent(event); err != nil {
-						return errors.Wrapf(err, "block %v: %v", block.Number, err.Error())
+				events, err := eventMiner.MineEvent(op, content)
+				if err == nil {
+					for _, event := range events {
+						err = processor.handleEvent(event)
+						if err != nil {
+							break
+						}
 					}
+				}
+				if err != nil {
+					return errors.Wrapf(err, "block %v: %v", block.Number, err.Error())
 				}
 			}
 		}
@@ -245,6 +255,8 @@ func (processor *BlockProcessor) handleEvent(event interface{}) error {
 		return processor.HandleTransferMadeEvent(event)
 	case *events.UserMentioned:
 		return processor.HandleUserMentionedEvent(event)
+	case *events.UserFollowStatusChanged:
+		return processor.HandleUserFollowStatusChangedEvent(event)
 	case *events.StoryPublished:
 		return processor.HandleStoryPublishedEvent(event)
 	case *events.StoryVoted:
@@ -318,6 +330,27 @@ func (processor *BlockProcessor) HandleUserMentionedEvent(event *events.UserMent
 		processor.DispatchUserMentionedEvent(result.OwnerId.Hex(), event)
 	}
 	return errors.Wrap(iter.Err(), "failed get target users for user.mentioned")
+}
+
+func (processor *BlockProcessor) HandleUserFollowStatusChangedEvent(
+	event *events.UserFollowStatusChanged,
+) error {
+
+	query := bson.M{
+		"kind":  "user.follow_changed",
+		"users": event.Op.Following,
+	}
+
+	log.Println(query)
+
+	var result struct {
+		OwnerId bson.ObjectId `bson:"ownerId"`
+	}
+	iter := processor.db.C("events").Find(query).Iter()
+	for iter.Next(&result) {
+		processor.DispatchUserFollowStatusChangedEvent(result.OwnerId.Hex(), event)
+	}
+	return errors.Wrap(iter.Err(), "failed get target users for user.follow_changed")
 }
 
 func (processor *BlockProcessor) HandleStoryPublishedEvent(event *events.StoryPublished) error {
@@ -563,6 +596,17 @@ func (processor *BlockProcessor) DispatchUserMentionedEvent(userId string, event
 	processor.t.Go(func() error {
 		return processor.dispatchEvent(userId, func(notifier Notifier, settings bson.Raw) error {
 			return notifier.DispatchUserMentionedEvent(userId, settings, event)
+		})
+	})
+}
+
+func (processor *BlockProcessor) DispatchUserFollowStatusChangedEvent(
+	userId string,
+	event *events.UserFollowStatusChanged,
+) {
+	processor.t.Go(func() error {
+		return processor.dispatchEvent(userId, func(notifier Notifier, settings bson.Raw) error {
+			return notifier.DispatchUserFollowStatusChangedEvent(userId, settings, event)
 		})
 	})
 }

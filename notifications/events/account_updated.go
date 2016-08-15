@@ -17,11 +17,11 @@ func NewAccountUpdatedEventMiner() *AccountUpdatedEventMiner {
 func (miner *AccountUpdatedEventMiner) MineEvent(
 	operation *database.Operation,
 	content *database.Content, // nil
-) []interface{} {
+) ([]interface{}, error) {
 
 	op, ok := operation.Body.(*database.AccountUpdateOperation)
 	if !ok {
-		return nil
+		return nil, nil
 	}
-	return []interface{}{&AccountUpdated{op}}
+	return []interface{}{&AccountUpdated{op}}, nil
 }

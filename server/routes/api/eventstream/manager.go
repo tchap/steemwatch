@@ -139,6 +139,14 @@ func (manager *Manager) DispatchUserMentionedEvent(
 	return manager.sendEvent(userId, formatUserMentioned(event))
 }
 
+func (manager *Manager) DispatchUserFollowStatusChangedEvent(
+	userId string,
+	_ bson.Raw,
+	event *events.UserFollowStatusChanged,
+) error {
+	return manager.sendEvent(userId, formatUserFollowStatusChanged(event))
+}
+
 func (manager *Manager) DispatchStoryPublishedEvent(
 	userId string,
 	_ bson.Raw,

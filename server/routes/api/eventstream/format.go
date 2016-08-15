@@ -16,7 +16,7 @@ type AccountUpdatedPayload struct {
 	Account string `json:"account"`
 }
 
-func formatAccountUpdated(event *events.AccountUpdated) interface{} {
+func formatAccountUpdated(event *events.AccountUpdated) *Event {
 	return &Event{
 		Kind: "account.updated",
 		Payload: &AccountUpdatedPayload{
@@ -32,7 +32,7 @@ type TransferMadePayload struct {
 	Memo   string `json:"memo,omitempty"`
 }
 
-func formatTransferMade(event *events.TransferMade) interface{} {
+func formatTransferMade(event *events.TransferMade) *Event {
 	return &Event{
 		Kind: "transfer.made",
 		Payload: &TransferMadePayload{
@@ -51,7 +51,7 @@ type UserMentionedPayload struct {
 	Permlink string `json:"permlink"`
 }
 
-func formatUserMentioned(event *events.UserMentioned) interface{} {
+func formatUserMentioned(event *events.UserMentioned) *Event {
 	return &Event{
 		Kind: "user.mentioned",
 		Payload: &UserMentionedPayload{
@@ -63,6 +63,37 @@ func formatUserMentioned(event *events.UserMentioned) interface{} {
 	}
 }
 
+type UserFollowStatusChangedPayload struct {
+	Follower  string `json:"follower"`
+	Following string `json:"following"`
+	What      string `json:"what,omitempty"`
+}
+
+func formatUserFollowStatusChanged(event *events.UserFollowStatusChanged) *Event {
+	var what string
+	for _, v := range event.Op.What {
+		what = v
+		break
+	}
+	switch what {
+	case "blog":
+		what = "follow"
+	case "ignore":
+		what = "mute"
+	case "":
+		what = "reset"
+	}
+
+	return &Event{
+		Kind: "user.follow_changed",
+		Payload: &UserFollowStatusChangedPayload{
+			Follower:  event.Op.Follower,
+			Following: event.Op.Following,
+			What:      what,
+		},
+	}
+}
+
 type StoryPublishedPayload struct {
 	Author string   `json:"author"`
 	Title  string   `json:"title"`
@@ -70,7 +101,7 @@ type StoryPublishedPayload struct {
 	Tags   []string `json:"tags"`
 }
 
-func formatStoryPublished(event *events.StoryPublished) interface{} {
+func formatStoryPublished(event *events.StoryPublished) *Event {
 	return &Event{
 		Kind: "story.published",
 		Payload: &StoryPublishedPayload{
@@ -93,7 +124,7 @@ type StoryVotedPayload struct {
 	TotalPendingPayout string `json:"totalPendingPayout"`
 }
 
-func formatStoryVoted(event *events.StoryVoted) interface{} {
+func formatStoryVoted(event *events.StoryVoted) *Event {
 	return &Event{
 		Kind: "story.voted",
 		Payload: &StoryVotedPayload{
@@ -118,7 +149,7 @@ type CommentPublishedPayload struct {
 	ReadMore       bool   `json:"more,omitempty"`
 }
 
-func formatCommentPublished(event *events.CommentPublished) interface{} {
+func formatCommentPublished(event *events.CommentPublished) *Event {
 	commentLines := make([]string, 0, 5)
 	scanner := bufio.NewScanner(strings.NewReader(event.Content.Body))
 	i := 0
@@ -154,7 +185,7 @@ type CommentVotedPayload struct {
 	TotalPendingPayout string `json:"totalPendingPayout"`
 }
 
-func formatCommentVoted(event *events.CommentVoted) interface{} {
+func formatCommentVoted(event *events.CommentVoted) *Event {
 	return &Event{
 		Kind: "comment.voted",
 		Payload: &CommentVotedPayload{

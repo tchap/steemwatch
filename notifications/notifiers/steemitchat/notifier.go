@@ -128,6 +128,16 @@ func (notifier *Notifier) DispatchUserMentionedEvent(
 	})
 }
 
+func (notifier *Notifier) DispatchUserFollowStatusChangedEvent(
+	userId string,
+	userSettings bson.Raw,
+	event *events.UserFollowStatusChanged,
+) error {
+	return notifier.dispatch(userId, userSettings, func() (*Payload, error) {
+		return renderUserFollowStatusChangedEvent(event)
+	})
+}
+
 func (notifier *Notifier) DispatchStoryPublishedEvent(
 	userId string,
 	userSettings bson.Raw,

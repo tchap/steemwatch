@@ -25,11 +25,11 @@ func NewUserMentionedEventMiner() *UserMentionedEventMiner {
 func (miner *UserMentionedEventMiner) MineEvent(
 	operation *database.Operation,
 	content *database.Content,
-) []interface{} {
+) ([]interface{}, error) {
 
 	op, ok := operation.Body.(*database.CommentOperation)
 	if !ok {
-		return nil
+		return nil, nil
 	}
 
 	match := miner.re.FindAllStringSubmatch(content.Body, -1)
@@ -38,5 +38,5 @@ func (miner *UserMentionedEventMiner) MineEvent(
 	for _, m := range match {
 		events = append(events, &UserMentioned{op, content, m[1]})
 	}
-	return events
+	return events, nil
 }

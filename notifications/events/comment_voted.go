@@ -18,16 +18,16 @@ func NewCommentVotedEventMiner() *CommentVotedEventMiner {
 func (miner *CommentVotedEventMiner) MineEvent(
 	operation *database.Operation,
 	content *database.Content,
-) []interface{} {
+) ([]interface{}, error) {
 
 	if content.IsStory() {
-		return nil
+		return nil, nil
 	}
 
 	op, ok := operation.Body.(*database.VoteOperation)
 	if !ok {
-		return nil
+		return nil, nil
 	}
 
-	return []interface{}{&CommentVoted{op, content}}
+	return []interface{}{&CommentVoted{op, content}}, nil
 }

@@ -35,6 +35,7 @@ type Notifier interface {
 	DispatchAccountUpdatedEvent(userId string, userSettings bson.Raw, event *events.AccountUpdated) error
 	DispatchTransferMadeEvent(userId string, userSettings bson.Raw, event *events.TransferMade) error
 	DispatchUserMentionedEvent(userId string, userSettings bson.Raw, event *events.UserMentioned) error
+	DispatchUserFollowStatusChangedEvent(userId string, userSettings bson.Raw, event *events.UserFollowStatusChanged) error
 	DispatchStoryPublishedEvent(userId string, userSettings bson.Raw, event *events.StoryPublished) error
 	DispatchStoryVotedEvent(userId string, userSettings bson.Raw, event *events.StoryVoted) error
 	DispatchCommentPublishedEvent(userId string, userSettings bson.Raw, event *events.CommentPublished) error

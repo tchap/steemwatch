@@ -17,11 +17,11 @@ func NewTransferMadeEventMiner() *TransferMadeEventMiner {
 func (miner *TransferMadeEventMiner) MineEvent(
 	operation *database.Operation,
 	content *database.Content, // nil
-) []interface{} {
+) ([]interface{}, error) {
 
 	op, ok := operation.Body.(*database.TransferOperation)
 	if !ok {
-		return nil
+		return nil, nil
 	}
-	return []interface{}{&TransferMade{op}}
+	return []interface{}{&TransferMade{op}}, nil
 }

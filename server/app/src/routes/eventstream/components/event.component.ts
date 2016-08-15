@@ -15,13 +15,14 @@ import {
 
 import { EventModel } from '../models/event.model';
 
-import { AccountUpdatedEventComponent } from './event-account-updated.component';
-import { TransferMadeEventComponent }   from './event-transfer-made.component';
-import { UserMentionedEventComponent }   from './event-user-mentioned.component';
-import { StoryPublishedEventComponent } from './event-story-published.component';
-import { StoryVotedEventComponent } from './event-story-voted.component';
-import { CommentPublishedEventComponent } from './event-comment-published.component';
-import { CommentVotedEventComponent } from './event-comment-voted.component';
+import { AccountUpdatedEventComponent }          from './event-account-updated.component';
+import { TransferMadeEventComponent }            from './event-transfer-made.component';
+import { UserMentionedEventComponent }           from './event-user-mentioned.component';
+import { UserFollowStatusChangedEventComponent } from './event-user-follow-status-changed.component';
+import { StoryPublishedEventComponent }          from './event-story-published.component';
+import { StoryVotedEventComponent }              from './event-story-voted.component';
+import { CommentPublishedEventComponent }        from './event-comment-published.component';
+import { CommentVotedEventComponent }            from './event-comment-voted.component';
 
 
 @Component({
@@ -36,6 +37,7 @@ import { CommentVotedEventComponent } from './event-comment-voted.component';
     AccountUpdatedEventComponent,
     TransferMadeEventComponent,
     UserMentionedEventComponent,
+    UserFollowStatusChangedEventComponent,
     StoryPublishedEventComponent,
     StoryVotedEventComponent,
     CommentPublishedEventComponent,

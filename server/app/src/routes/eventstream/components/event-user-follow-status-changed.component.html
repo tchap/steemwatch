@@ -1,0 +1,13 @@
+<a href="https://steemit.com/@{{model.follower}}" target="_blank">
+  @{{model.follower}}
+</a>
+
+<span [ngSwitch]="model.what">
+  <span *ngSwitchCase="'follow'">started following</span>
+  <span *ngSwitchCase="'mute'">muted</span>
+  <span *ngSwitchCase="'reset'">reset the follow status for</span>
+</span>
+
+<a href="https://steemit.com/@{{model.following}}" target="_blank">
+  @{{model.following}}
+</a>

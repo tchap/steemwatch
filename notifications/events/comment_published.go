@@ -18,16 +18,16 @@ func NewCommentPublishedEventMiner() *CommentPublishedEventMiner {
 func (miner *CommentPublishedEventMiner) MineEvent(
 	operation *database.Operation,
 	content *database.Content,
-) []interface{} {
+) ([]interface{}, error) {
 
 	if content.IsStory() {
-		return nil
+		return nil, nil
 	}
 
 	op, ok := operation.Body.(*database.CommentOperation)
 	if !ok {
-		return nil
+		return nil, nil
 	}
 
-	return []interface{}{&CommentPublished{op, content}}
+	return []interface{}{&CommentPublished{op, content}}, nil
 }

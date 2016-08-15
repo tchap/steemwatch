@@ -18,16 +18,16 @@ func NewStoryVotedEventMiner() *StoryVotedEventMiner {
 func (miner *StoryVotedEventMiner) MineEvent(
 	operation *database.Operation,
 	content *database.Content,
-) []interface{} {
+) ([]interface{}, error) {
 
 	if !content.IsStory() {
-		return nil
+		return nil, nil
 	}
 
 	op, ok := operation.Body.(*database.VoteOperation)
 	if !ok {
-		return nil
+		return nil, nil
 	}
 
-	return []interface{}{&StoryVoted{op, content}}
+	return []interface{}{&StoryVoted{op, content}}, nil
 }
