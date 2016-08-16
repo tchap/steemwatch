@@ -82,18 +82,10 @@ export class ContentSubtreeComponent implements OnInit {
     };
 
     this.form = new FormGroup({
-      rootURL:    new FormControl(),
+      rootURL:    new FormControl('', validateRootURL),
       selectMode: new FormControl(),
-      depthLimit: new FormControl()
+      depthLimit: new FormControl('', validateDepthLimit)
     });
-
-    /*
-    this.form = this.formBuilder.group({
-      rootURL: ['', validateRootURL],
-      selectMode: [],
-      depthLimit: ['', validateDepthLimit]
-    });
-   */
 
     this.modalModel = this.newModalModel();
   }

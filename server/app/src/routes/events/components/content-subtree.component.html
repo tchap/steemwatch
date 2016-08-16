@@ -91,6 +91,7 @@
                     value="depthLimit">
                   Limit descendant content by depth:
                   <input class="form-control" type="number" name="depthLimit" min="1"
+                    formControlName="depthLimit"
                     [(ngModel)]="modalModel.depthLimit"
                     [disabled]="modalModel.selectMode !== 'depthLimit'"
                     [required]="modalModel.selectMode === 'depthLimit'">
