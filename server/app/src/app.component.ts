@@ -1,11 +1,9 @@
-import { Component, OnInit }         from '@angular/core';
-import { Location }                  from '@angular/common';
-import { Router, ROUTER_DIRECTIVES } from '@angular/router';
-import { HTTP_PROVIDERS }            from '@angular/http';
+import { Component, OnInit } from '@angular/core';
+import { Location }          from '@angular/common';
+import { HTTP_PROVIDERS }    from '@angular/http';
+import { Router }            from '@angular/router'
 
 import { CookieService } from 'angular2-cookie/core';
-
-import { routing } from './app.routing';
 
 import { ContextService, Context } from './services/context.service';
 import { ProfileService }          from './services/profile.service';
@@ -16,15 +14,14 @@ import { MessageService }          from './services/index';
 @Component({
   selector: 'app',
   templateUrl: '/app/src/app.component.html',
-  directives: [ROUTER_DIRECTIVES, MessageComponent],
+  directives: [MessageComponent],
   providers: [
     ContextService,
     ProfileService,
     MessageService,
     HTTP_PROVIDERS,
     CookieService
-  ],
-  precompile: APP_ROUTE_COMPONENTS
+  ]
 })
 export class AppComponent implements OnInit {
 
