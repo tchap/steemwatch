@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { Location }          from '@angular/common';
-import { HTTP_PROVIDERS }    from '@angular/http';
-import { Router }            from '@angular/router'
+import { Component }      from '@angular/core';
+import { Location }       from '@angular/common';
+import { HTTP_PROVIDERS } from '@angular/http';
+import { Router }         from '@angular/router'
 
 import { CookieService } from 'angular2-cookie/core';
 
@@ -23,7 +23,7 @@ import { MessageService }          from './services/index';
     CookieService
   ]
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
 
   ctx: Context;
 
@@ -33,17 +33,6 @@ export class AppComponent implements OnInit {
     private contextService: ContextService
   ) {
     this.ctx = contextService.getContext();
-  }
-
-  ngOnInit() {
-    const subscription = this.router.events.subscribe(
-      () => {
-        if (!this.location.path()) {
-          subscription.unsubscribe();
-          this.router.navigate(['/home']);
-        }
-      }
-    );
   }
 
   logout() {
