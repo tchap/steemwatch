@@ -1,11 +1,6 @@
-import { Component, OnInit }         from '@angular/core';
-import { Location }                  from '@angular/common';
-import { Router, ROUTER_DIRECTIVES } from '@angular/router';
-import { HTTP_PROVIDERS }            from '@angular/http';
+import { Component }      from '@angular/core';
 
 import { CookieService } from 'angular2-cookie/core';
-
-import { APP_ROUTE_COMPONENTS } from './app.routes';
 
 import { ContextService, Context } from './services/context.service';
 import { ProfileService }          from './services/profile.service';
@@ -16,37 +11,22 @@ import { MessageService }          from './services/index';
 @Component({
   selector: 'app',
   templateUrl: '/app/src/app.component.html',
-  directives: [ROUTER_DIRECTIVES, MessageComponent],
+  directives: [MessageComponent],
   providers: [
     ContextService,
     ProfileService,
     MessageService,
-    HTTP_PROVIDERS,
     CookieService
-  ],
-  precompile: APP_ROUTE_COMPONENTS
+  ]
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
 
   ctx: Context;
 
   constructor(
-    private router: Router,
-    private location: Location,
     private contextService: ContextService
   ) {
     this.ctx = contextService.getContext();
-  }
-
-  ngOnInit() {
-    const subscription = this.router.events.subscribe(
-      () => {
-        if (!this.location.path()) {
-          subscription.unsubscribe();
-          this.router.navigate(['/home']);
-        }
-      }
-    );
   }
 
   logout() {

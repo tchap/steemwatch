@@ -1,12 +1,5 @@
 import { Component, Input, ViewChild } from '@angular/core';
 
-import {
-  REACTIVE_FORM_DIRECTIVES,
-  FormGroup,
-  FormControl,
-  FormBuilder
-} from '@angular/forms';
-
 import 'rxjs/add/operator/finally';
 
 import { SteemitChatService }  from '../services/steemit-chat.service';
@@ -18,7 +11,6 @@ import { SteemitChatSettings } from '../models/steemit-chat.model';
   selector: 'steemit-chat-modal',
   templateUrl: 'steemit-chat-modal.component.html',
   styleUrls: ['steemit-chat-modal.component.css'],
-  directives: [REACTIVE_FORM_DIRECTIVES],
   providers: [SteemitChatService]
 })
 export class SteemitChatModalComponent {
@@ -32,10 +24,7 @@ export class SteemitChatModalComponent {
   processing:   boolean;
   errorMessage: string;
 
-  form: FormGroup;
-
   constructor(
-    private formBuilder: FormBuilder,
     private chatService: SteemitChatService
   ) {}
 
