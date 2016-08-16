@@ -24,7 +24,10 @@ export class ListComponent implements OnInit, AfterViewChecked {
 
   private focus: boolean;
 
-  constructor(private http: Http, private cookies: CookieService) {}
+  constructor(
+    private http:    Http,
+    private cookies: CookieService
+  ) {}
 
   ngOnInit() {
     this.load();

@@ -1,7 +1,4 @@
 import { Component }      from '@angular/core';
-import { Location }       from '@angular/common';
-import { HTTP_PROVIDERS } from '@angular/http';
-import { Router }         from '@angular/router'
 
 import { CookieService } from 'angular2-cookie/core';
 
@@ -19,7 +16,6 @@ import { MessageService }          from './services/index';
     ContextService,
     ProfileService,
     MessageService,
-    HTTP_PROVIDERS,
     CookieService
   ]
 })
@@ -28,8 +24,6 @@ export class AppComponent {
   ctx: Context;
 
   constructor(
-    private router: Router,
-    private location: Location,
     private contextService: ContextService
   ) {
     this.ctx = contextService.getContext();

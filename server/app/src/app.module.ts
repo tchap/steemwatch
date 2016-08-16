@@ -1,7 +1,7 @@
-import { NgModule }      from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { HttpModule }    from '@angular/http';
-import { FormsModule }   from '@angular/forms';
+import { NgModule }                         from '@angular/core';
+import { BrowserModule }                    from '@angular/platform-browser';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpModule }                       from '@angular/http';
 
 import { AppComponent } from './app.component';
 
@@ -12,25 +12,32 @@ import { HomeComponent }          from './routes/home/index';
 import { NotificationsComponent } from './routes/notifications/index';
 import { ProfileComponent}        from './routes/profile/index';
 
+import { ListComponent }    from './components/list.component';
+import { MessageComponent } from './components/message.component';
+
 
 @NgModule({
+  imports: [
+    // Common
+    BrowserModule,
+    // Forms
+    FormsModule,
+    ReactiveFormsModule,
+    // HTTP
+    HttpModule,
+    // Routing
+    routing
+  ],
   declarations: [
+    // App
     AppComponent,
+    // Routes
     EventsComponent,
     EventStreamComponent,
     HomeComponent,
     NotificationsComponent,
     ProfileComponent
   ],
-  imports:      [
-    BrowserModule,
-    // Router
-    routing,
-    // Forms
-    FormsModule,
-    // HTTP
-    HttpModule
-  ],
-  bootstrap:    [AppComponent],
+  bootstrap: [AppComponent],
 })
 export class AppModule {}
