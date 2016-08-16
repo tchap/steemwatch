@@ -59,21 +59,24 @@
               <span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title" id="myModalLabel">New Content Descendant Rule</h4>
           </div>
-          <form (ngSubmit)="onSubmit()" [formGroup]="form">
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
             <div class="modal-body">
 
               <div class="form-group">
                 <label for="rootURL">Content URL</label>
                 <p>This can be a story or a comment URL copied from Steemit.com</p>
-                <input class="form-control" type="url" name="rootURL" id="rootURL" required
-                  [(ngModel)]="modalModel.rootURL" #rootURL>
+                <input class="form-control" type="url"
+                       name="rootURL" id="rootURL" formControlName="rootURL"
+                       [(ngModel)]="modalModel.rootURL" #rootURL required>
               </div>
 
               <label>Content Descendant Selection</label>
               <p>Choose what descendants to watch:</p>
               <div class="radio">
                 <label class="inline">
-                  <input type="radio" name="selectMode" [(ngModel)]="modalModel.selectMode"
+                  <input type="radio" name="selectMode"
+                    formControlName="selectMode"
+                    [(ngModel)]="modalModel.selectMode"
                     (click)="modeChanged()"
                     value="any" checked>
                   Any descendant content
@@ -81,7 +84,9 @@
               </div>
               <div class="radio">
                 <label class="inline">
-                  <input type="radio" name="selectMode" [(ngModel)]="modalModel.selectMode"
+                  <input type="radio" name="selectMode"
+                    formControlName="selectMode"
+                    [(ngModel)]="modalModel.selectMode"
                     (click)="modeChanged()"
                     value="depthLimit">
                   Limit descendant content by depth:

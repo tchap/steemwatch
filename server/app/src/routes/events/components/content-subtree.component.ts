@@ -1,6 +1,6 @@
-import { Component, ViewChild, OnInit }   from '@angular/core';
-import { Http, Headers }                  from '@angular/http';
-import { REACTIVE_FORM_DIRECTIVES, FormGroup, FormControl, FormBuilder } from '@angular/forms';
+import { Component, ViewChild, OnInit } from '@angular/core';
+import { Http, Headers }                from '@angular/http';
+import { FormGroup, FormControl }       from '@angular/forms';
 
 import { CookieService } from 'angular2-cookie/core';
 
@@ -13,7 +13,6 @@ import { ContentModalModel } from '../models/content-modal.model';
   moduleId: module.id,
   selector: "content-subtree",
   templateUrl: "content-subtree.component.html",
-  directives: [REACTIVE_FORM_DIRECTIVES],
   providers: [ContentDescendantPublishedService]
 })
 export class ContentSubtreeComponent implements OnInit {
@@ -21,6 +20,7 @@ export class ContentSubtreeComponent implements OnInit {
   listModel: ContentModalModel[] = [];
 
   modalModel: ContentModalModel = this.newModalModel();
+
   form: FormGroup;
 
   @ViewChild('rootURL') rootURLChild;
@@ -31,8 +31,7 @@ export class ContentSubtreeComponent implements OnInit {
   removeErrorMessage: string;
 
   constructor(
-    private formBuilder: FormBuilder,
-    private http: Http,
+    private http:    Http,
     private cookies: CookieService,
     private service: ContentDescendantPublishedService
   ) {}
@@ -82,11 +81,19 @@ export class ContentSubtreeComponent implements OnInit {
       };
     };
 
+    this.form = new FormGroup({
+      rootURL:    new FormControl(),
+      selectMode: new FormControl(),
+      depthLimit: new FormControl()
+    });
+
+    /*
     this.form = this.formBuilder.group({
       rootURL: ['', validateRootURL],
       selectMode: [],
       depthLimit: ['', validateDepthLimit]
     });
+   */
 
     this.modalModel = this.newModalModel();
   }
