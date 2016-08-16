@@ -5,7 +5,7 @@ import { HTTP_PROVIDERS }            from '@angular/http';
 
 import { CookieService } from 'angular2-cookie/core';
 
-import { APP_ROUTE_COMPONENTS } from './app.routes';
+import { routing } from './app.routing';
 
 import { ContextService, Context } from './services/context.service';
 import { ProfileService }          from './services/profile.service';
