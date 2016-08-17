@@ -69,6 +69,7 @@ func (store *UserStore) StoreUser(user *users.User) (string, error) {
 		update = bson.M{
 			"$set": selector,
 		}
+
 	case len(user.SocialLinks) != 0:
 		var (
 			serviceName string
@@ -93,7 +94,7 @@ func (store *UserStore) StoreUser(user *users.User) (string, error) {
 		}
 
 	default:
-		return "", errors.New("invalid user object")
+		return "", errors.Errorf("invalid user object: %+v", *user)
 	}
 
 	_, err := store.users.Upsert(selector, update)
