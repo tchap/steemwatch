@@ -68,7 +68,7 @@ func (authenticator *Authenticator) Callback(ctx echo.Context) (*auth.UserProfil
 
 	// Make sure the email address is set.
 	if me.Email == "" {
-		return nil, errors.New("Facebook did not return any email address")
+		return nil, errors.Errorf("Facebook did not return any email address: %+v", me)
 	}
 
 	// Assemble the profile that we use internally.
