@@ -16,6 +16,7 @@ import {
 import { EventModel } from '../models/event.model';
 
 import { AccountUpdatedEventComponent }          from './event-account-updated.component';
+import { AccountWitnessVotedEventComponent }     from './event-account-witness-voted.component';
 import { TransferMadeEventComponent }            from './event-transfer-made.component';
 import { UserMentionedEventComponent }           from './event-user-mentioned.component';
 import { UserFollowStatusChangedEventComponent } from './event-user-follow-status-changed.component';
@@ -35,6 +36,7 @@ import { CommentVotedEventComponent }            from './event-comment-voted.com
     NgSwitchCase,
     NgSwitchDefault,
     AccountUpdatedEventComponent,
+    AccountWitnessVotedEventComponent,
     TransferMadeEventComponent,
     UserMentionedEventComponent,
     UserFollowStatusChangedEventComponent,

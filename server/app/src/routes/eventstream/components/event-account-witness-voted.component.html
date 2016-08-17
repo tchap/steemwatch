@@ -1,0 +1,11 @@
+<div>
+  <a href="https://steemit.com/@{{model.user}}" target="_blank">
+    @{{model.account}}
+  </a>
+  <span *ngIf="model.approve">approved</span>
+  <span *ngIf="!model.approve">unapproved</span>
+  witness
+  <a href="https://steemit.com{{model.url}}" target="_blank">
+    @{{model.witness}}
+  </a>
+</div>

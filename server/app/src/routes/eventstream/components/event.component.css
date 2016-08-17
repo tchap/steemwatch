@@ -22,6 +22,10 @@
   border-left-color: #B0171F;
 }
 
+.event.account-witness_voted {
+  border-left-color: #3D59AB;
+}
+
 .event.transfer-made {
   border-left-color: #00B2EE;
 }

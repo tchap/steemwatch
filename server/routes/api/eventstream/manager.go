@@ -123,6 +123,14 @@ func (manager *Manager) DispatchAccountUpdatedEvent(
 	return manager.sendEvent(userId, formatAccountUpdated(event))
 }
 
+func (manager *Manager) DispatchAccountWitnessVotedEvent(
+	userId string,
+	_ bson.Raw,
+	event *events.AccountWitnessVoted,
+) error {
+	return manager.sendEvent(userId, formatAccountWitnessVoted(event))
+}
+
 func (manager *Manager) DispatchTransferMadeEvent(
 	userId string,
 	_ bson.Raw,

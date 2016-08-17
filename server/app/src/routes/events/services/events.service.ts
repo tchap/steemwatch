@@ -20,6 +20,23 @@ const events : Event[] = [
     ]
   },
   {
+    id:          "account.witness_voted",
+    title:       "Account Witness Voted",
+    description: "An account approved or unapproved a witness.",
+    fields:      [
+      {
+        id:          "accounts",
+        label:       "Accounts",
+        description: "You will be notified when any of the following accounts approves or unapproves a witness."
+      },
+      {
+        id:          "witnesses",
+        label:       "Witnesses",
+        description: "You will be notified when any of the following witnesses is approved or unapproved."
+      }
+    ]
+  },
+  {
     id:          "transfer.made",
     title:       "Transfer Made",
     description: "A transfer was made.",

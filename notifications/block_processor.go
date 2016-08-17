@@ -83,6 +83,9 @@ func New(client *rpc.Client, db *mgo.Database, opts ...Option) (*BlockProcessor,
 		database.OpTypeAccountUpdate: []EventMiner{
 			events.NewAccountUpdatedEventMiner(),
 		},
+		database.OpTypeAccountWitnessVote: []EventMiner{
+			events.NewAccountWitnessVotedEventMiner(),
+		},
 		database.OpTypeTransfer: []EventMiner{
 			events.NewTransferMadeEventMiner(),
 		},
@@ -251,6 +254,8 @@ func (processor *BlockProcessor) handleEvent(event interface{}) error {
 	switch event := event.(type) {
 	case *events.AccountUpdated:
 		return processor.HandleAccountUpdatedEvent(event)
+	case *events.AccountWitnessVoted:
+		return processor.HandleAccountWitnessVotedEvent(event)
 	case *events.TransferMade:
 		return processor.HandleTransferMadeEvent(event)
 	case *events.UserMentioned:
@@ -286,6 +291,31 @@ func (processor *BlockProcessor) HandleAccountUpdatedEvent(event *events.Account
 		processor.DispatchAccountUpdatedEvent(result.OwnerId.Hex(), event)
 	}
 	return errors.Wrap(iter.Err(), "failed get target users for account.updated")
+}
+
+func (processor *BlockProcessor) HandleAccountWitnessVotedEvent(event *events.AccountWitnessVoted) error {
+	query := bson.M{
+		"kind": "account.witness_voted",
+		"$or": []interface{}{
+			bson.M{
+				"accounts": event.Op.Account,
+			},
+			bson.M{
+				"witnesses": event.Op.Witness,
+			},
+		},
+	}
+
+	log.Println(query)
+
+	var result struct {
+		OwnerId bson.ObjectId `bson:"ownerId"`
+	}
+	iter := processor.db.C("events").Find(query).Iter()
+	for iter.Next(&result) {
+		processor.DispatchAccountWitnessVotedEvent(result.OwnerId.Hex(), event)
+	}
+	return errors.Wrap(iter.Err(), "failed get target users for account.witness_voted")
 }
 
 func (processor *BlockProcessor) HandleTransferMadeEvent(event *events.TransferMade) error {
@@ -580,6 +610,17 @@ func (processor *BlockProcessor) DispatchAccountUpdatedEvent(userId string, even
 	processor.t.Go(func() error {
 		return processor.dispatchEvent(userId, func(notifier Notifier, settings bson.Raw) error {
 			return notifier.DispatchAccountUpdatedEvent(userId, settings, event)
+		})
+	})
+}
+
+func (processor *BlockProcessor) DispatchAccountWitnessVotedEvent(
+	userId string,
+	event *events.AccountWitnessVoted,
+) {
+	processor.t.Go(func() error {
+		return processor.dispatchEvent(userId, func(notifier Notifier, settings bson.Raw) error {
+			return notifier.DispatchAccountWitnessVotedEvent(userId, settings, event)
 		})
 	})
 }
