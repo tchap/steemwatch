@@ -33,6 +33,7 @@ func init() {
 
 type Notifier interface {
 	DispatchAccountUpdatedEvent(userId string, userSettings bson.Raw, event *events.AccountUpdated) error
+	DispatchAccountWitnessVotedEvent(userId string, userSettings bson.Raw, event *events.AccountWitnessVoted) error
 	DispatchTransferMadeEvent(userId string, userSettings bson.Raw, event *events.TransferMade) error
 	DispatchUserMentionedEvent(userId string, userSettings bson.Raw, event *events.UserMentioned) error
 	DispatchUserFollowStatusChangedEvent(userId string, userSettings bson.Raw, event *events.UserFollowStatusChanged) error

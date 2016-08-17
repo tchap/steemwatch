@@ -5,6 +5,10 @@
       <event-account-updated [model]="model.payload" #ev></event-account-updated>
     </div>
 
+    <div *ngSwitchCase="'account.witness_voted'">
+      <event-account-witness-voted [model]="model.payload" #ev></event-account-witness-voted>
+    </div>
+
     <div *ngSwitchCase="'transfer.made'">
       <event-transfer-made [model]="model.payload" #ev></event-transfer-made>
     </div>

@@ -25,6 +25,23 @@ func formatAccountUpdated(event *events.AccountUpdated) *Event {
 	}
 }
 
+type AccountWitnessVotedPayload struct {
+	Account string `json:"account"`
+	Witness string `json:"witness"`
+	Approve bool   `json:"approve"`
+}
+
+func formatAccountWitnessVoted(event *events.AccountWitnessVoted) *Event {
+	return &Event{
+		Kind: "account.witness_voted",
+		Payload: &AccountWitnessVotedPayload{
+			Account: event.Op.Account,
+			Witness: event.Op.Witness,
+			Approve: event.Op.Approve,
+		},
+	}
+}
+
 type TransferMadePayload struct {
 	From   string `json:"from"`
 	To     string `json:"to"`

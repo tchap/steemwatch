@@ -108,6 +108,16 @@ func (notifier *Notifier) DispatchAccountUpdatedEvent(
 	})
 }
 
+func (notifier *Notifier) DispatchAccountWitnessVotedEvent(
+	userId string,
+	userSettings bson.Raw,
+	event *events.AccountWitnessVoted,
+) error {
+	return notifier.dispatch(userId, userSettings, func() (*Payload, error) {
+		return renderAccountWitnessVotedEvent(event)
+	})
+}
+
 func (notifier *Notifier) DispatchTransferMadeEvent(
 	userId string,
 	userSettings bson.Raw,

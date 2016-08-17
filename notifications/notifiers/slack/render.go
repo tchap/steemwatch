@@ -67,6 +67,23 @@ func renderAccountUpdatedEvent(event *events.AccountUpdated) (*Payload, error) {
 	}), nil
 }
 
+// AccountWitnessVoted
+
+func renderAccountWitnessVotedEvent(event *events.AccountWitnessVoted) (*Payload, error) {
+	var verb string
+	if event.Op.Approve {
+		verb = "approved"
+	} else {
+		verb = "unapproved"
+	}
+
+	txt := fmt.Sprintf("@%v %v witness @%v", event.Op.Account, verb, event.Op.Witness)
+
+	return &Payload{
+		Text: txt,
+	}, nil
+}
+
 // TransferMade
 
 func renderTransferMadeEvent(event *events.TransferMade) (*Payload, error) {
