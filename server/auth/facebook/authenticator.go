@@ -7,6 +7,7 @@ import (
 	"github.com/tchap/steemwatch/server/auth"
 
 	"github.com/labstack/echo"
+	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
 )
@@ -63,6 +64,11 @@ func (authenticator *Authenticator) Callback(ctx echo.Context) (*auth.UserProfil
 	var me FacebookProfile
 	if err := json.NewDecoder(resp.Body).Decode(&me); err != nil {
 		return nil, err
+	}
+
+	// Make sure the email address is set.
+	if me.Email == "" {
+		return nil, errors.New("Facebook did not return any email address")
 	}
 
 	// Assemble the profile that we use internally.
