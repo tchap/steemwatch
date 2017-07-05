@@ -246,20 +246,24 @@ func renderCommentPublishedEvent(event *events.CommentPublished) (*Payload, erro
 	}
 
 	evt := fmt.Sprintf("@%v commented on @%v/%v", c.Author, c.ParentAuthor, c.ParentPermlink)
-	pre := fmt.Sprintf("@%v <https://steemit.com%v|commented> on @%v/%v",
+	txt := fmt.Sprintf("@%v <https://steemit.com%v|commented> on @%v/%v",
 		c.Author, c.URL, c.ParentAuthor, c.ParentPermlink)
 
-	return makeMessage(&Attachment{
+	attachment := &Attachment{
 		Fallback: evt,
 		Color:    "#FF9912",
-		Pretext:  pre,
 		Fields: []*Field{
 			{
 				Title: "Comment Body",
 				Value: extract,
 			},
 		},
-	}), nil
+	}
+
+	return &Payload{
+		Text:        txt,
+		Attachments: []*Attachment{attachment},
+	}, nil
 }
 
 // CommentVoted
