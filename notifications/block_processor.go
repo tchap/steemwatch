@@ -62,6 +62,35 @@ func AddNotifier(id string, notifier Notifier) Option {
 }
 
 func New(client *rpc.Client, db *mgo.Database, opts ...Option) (*BlockProcessor, error) {
+	// Ensure DB indexes exist.
+	keys := [...]string{
+		"kind",
+		"accounts",
+		"witnesses",
+		"from",
+		"to",
+		"users",
+		"authorBlacklist",
+		"tags",
+		"authors"
+		"voters",
+		"parentAuthors",
+		"selectors.contentID",
+	}
+
+	for _, key := range keys {
+		log.Printf("Creating index for events.%v ...", key)
+
+		err := db.C("events").EnsureIndex(mgo.Index{
+			Key:        []string{key},
+			Background: true,
+			Sparse:     true,
+		})
+		if err != nil {
+			log.Printf("Failed creating index for events.%v: %v", key, err)
+		}
+	}
+
 	// Load config from the database.
 	var config BlockProcessorConfig
 	if err := db.C("configuration").FindId("BlockProcessor").One(&config); err != nil {
