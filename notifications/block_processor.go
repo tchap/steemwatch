@@ -8,6 +8,7 @@ import (
 
 	"github.com/tchap/steemwatch/notifications/events"
 	"github.com/tchap/steemwatch/server/routes/api/events/descendantpublished"
+	"github.com/tchap/steemwatch/server/users"
 
 	"github.com/go-steem/rpc"
 	"github.com/go-steem/rpc/apis/database"
@@ -61,38 +62,12 @@ func AddNotifier(id string, notifier Notifier) Option {
 	}
 }
 
-func New(client *rpc.Client, db *mgo.Database, opts ...Option) (*BlockProcessor, error) {
-	// Ensure DB indexes exist.
-	indexes := []struct {
-		Key    string
-		Sparse bool
-	}{
-		{"kind", false},
-		{"accounts", true},
-		{"witnesses", true},
-		{"from", true},
-		{"to", true},
-		{"users", true},
-		{"authorBlacklist", true},
-		{"tags", true},
-		{"authors", true},
-		{"voters", true},
-		{"parentAuthors", true},
-		{"selectors.contentID", true},
-	}
-
-	for _, index := range indexes {
-		log.Printf("Creating index for events.%v ...", index.Key)
-		err := db.C("events").EnsureIndex(mgo.Index{
-			Key:        []string{index.Key},
-			Background: true,
-			Sparse:     index.Sparse,
-		})
-		if err != nil {
-			log.Printf("Failed creating index for events.%v: %v", index.Key, err)
-		}
-	}
-
+func New(
+	client *rpc.Client,
+	db *mgo.Database,
+	userChangedCh <-chan *users.User,
+	opts ...Option,
+) (*BlockProcessor, error) {
 	// Load config from the database.
 	var config BlockProcessorConfig
 	if err := db.C("configuration").FindId("BlockProcessor").One(&config); err != nil {
