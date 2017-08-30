@@ -72,7 +72,7 @@ func New(client *rpc.Client, db *mgo.Database, opts ...Option) (*BlockProcessor,
 		"users",
 		"authorBlacklist",
 		"tags",
-		"authors"
+		"authors",
 		"voters",
 		"parentAuthors",
 		"selectors.contentID",
