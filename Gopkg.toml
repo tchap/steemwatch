@@ -76,3 +76,7 @@
 [[constraint]]
   branch = "v2"
   name = "gopkg.in/tomb.v2"
+
+[[constraint]]
+  name = "github.com/cznic/ql"
+  version = "1.1.0"

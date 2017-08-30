@@ -2,10 +2,70 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/cznic/b"
+  packages = ["."]
+  revision = "6955404bf550e1eae1bf83121739078b027f4547"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/cznic/fileutil"
+  packages = ["."]
+  revision = "90cf820aafe8f7df39416fdbb932029ff99bd1ab"
+
+[[projects]]
+  name = "github.com/cznic/internal"
+  packages = ["buffer","file","slice"]
+  revision = "cef02a853c3a93623c42eacd574e7ea05f55531b"
+  version = "1.0.0"
+
+[[projects]]
+  name = "github.com/cznic/lldb"
+  packages = ["."]
+  revision = "bea8611dd5c407f3c5eab9f9c68e887a27dc6f0e"
+  version = "v1.1.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/cznic/mathutil"
+  packages = ["."]
+  revision = "6baf61e0317058e3207936f50e310bd500fbbdb0"
+
+[[projects]]
+  name = "github.com/cznic/ql"
+  packages = [".","vendored/github.com/camlistore/go4/lock"]
+  revision = "7a63cd7aa46ecd9f549b96983029576af2178f60"
+  version = "v1.1.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/cznic/sortutil"
+  packages = ["."]
+  revision = "4c7342852e65c2088c981288f2c5610d10b9f7f4"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/cznic/strutil"
+  packages = ["."]
+  revision = "43a89592ed56c227c7fdb1fcaf7d1d08be02ec54"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/cznic/zappy"
+  packages = ["."]
+  revision = "2533cb5b45cc6c07421468ce262899ddc9d53fb7"
+
+[[projects]]
   name = "github.com/dgrijalva/jwt-go"
   packages = ["."]
   revision = "d2709f9f1f31ebcda9651b03077758c1f3a0018c"
   version = "v3.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/edsrzf/mmap-go"
+  packages = ["."]
+  revision = "0bce6a6887123b67a60366d2c9fe2dfb74289d2e"
 
 [[projects]]
   branch = "master"
@@ -178,6 +238,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2a06dab12718d7404e6231c2706bde61759a5df599226b480061b71042792b6e"
+  inputs-digest = "087b75ab8718933c742417e56781347b543f2046504f0cceeea137e32b6a791e"
   solver-name = "gps-cdcl"
   solver-version = 1

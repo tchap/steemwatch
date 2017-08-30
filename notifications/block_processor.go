@@ -10,6 +10,7 @@ import (
 	"github.com/tchap/steemwatch/server/routes/api/events/descendantpublished"
 	"github.com/tchap/steemwatch/server/users"
 
+	"github.com/cznic/ql"
 	"github.com/go-steem/rpc"
 	"github.com/go-steem/rpc/apis/database"
 	"github.com/pkg/errors"
@@ -38,6 +39,8 @@ type BlockProcessor struct {
 	client *rpc.Client
 	db     *mgo.Database
 	config *BlockProcessorConfig
+
+	mem *ql.DB
 
 	eventMiners         map[string][]EventMiner
 	additionalNotifiers map[string]Notifier
@@ -125,8 +128,18 @@ func New(
 		opt(processor)
 	}
 
+	// Build in-memory indexes.
+	if err := processor.buildDB(); err != nil {
+		return nil, err
+	}
+
 	// Start the config flusher.
 	processor.t.Go(processor.configFlusher)
+
+	// Start the index reloader.
+	processor.t.Go(func() error {
+		return processor.indexReloader(userChangedCh)
+	})
 
 	// Return the new BlockProcessor.
 	return processor, nil
@@ -250,6 +263,127 @@ func (processor *BlockProcessor) flushConfig(config *BlockProcessorConfig) error
 		return errors.Wrapf(err, "failed to store BlockProcessor configuration: %+v", config)
 	}
 	return nil
+}
+
+//==============================================================================
+// User data in-memory indexes
+//==============================================================================
+
+func (processor *BlockProcessor) buildDB() error {
+	mem, err := ql.OpenMem()
+	if err != nil {
+		return err
+	}
+
+	tctx := ql.NewRWCtx()
+
+	// account.updated
+	query := `
+	BEGIN TRANSACTION;
+		CREATE TABLE AccountUpdated_Account (
+			UserID  string NOT NULL,
+			Account string NOT NULL
+		);
+		CREATE INDEX AccountUpdatedUserID  ON AccountUpdated (UserID);
+		CREATE INDEX AccountUpdatedAccount ON AccountUpdated (Account);
+	COMMIT;
+	`
+
+	if _, _, err := mem.Run(tctx, query); err != nil {
+		mem.Close()
+		return err
+	}
+
+	// account.witness_voted
+	query = `
+	BEGIN TRANSACTION;
+		CREATE TABLE AccountWitnessVoted (
+			UserID  string NOT NULL,
+			Account string,
+			Witness string
+		);
+		CREATE INDEX AccountWitnessVotedUserID  ON AccountWitnessVoted (UserID);
+		CREATE INDEX AccountWitnessVotedAccount ON AccountWitnessVoted (Account);
+		CREATE INDEX AccountWitnessVotedWitness ON AccountWitnessVoted (Witness);
+	COMMIT;
+	`
+
+	if _, _, err := mem.Run(tctx, query); err != nil {
+		mem.Close()
+		return err
+	}
+
+	// transfer.made
+	query = `
+	BEGIN TRANSACTION;
+		CREATE TABLE TransferMade (
+			UserID  string NOT NULL,
+			From    string,
+			To      string
+		);
+		CREATE INDEX TransferMadeUserID ON TransferMade (UserID);
+		CREATE INDEX TransferMadeFrom   ON TransferMade (From);
+		CREATE INDEX TransferMadeTo     ON TransferMade (To);
+	COMMIT;
+	`
+
+	if _, _, err := mem.Run(tctx, query); err != nil {
+		mem.Close()
+		return err
+	}
+
+	// user.mentioned
+	query = `
+	BEGIN TRANSACTION;
+		CREATE TABLE UserMentioned (
+			UserID   string NOT NULL,
+			User     string,
+			BLAuthor string
+		);
+		CREATE INDEX UserMentionedUserID   ON UserMentioned (UserID);
+		CREATE INDEX UserMentionedUser     ON UserMentioned (User);
+		CREATE INDEX UserMentionedBLAuthor ON UserMentioned (BLAuthor);
+	COMMIT;
+	`
+
+	if _, _, err := mem.Run(tctx, query); err != nil {
+		mem.Close()
+		return err
+	}
+
+	// user.follow_changed
+	query = `
+	BEGIN TRANSACTION;
+		CREATE TABLE UserFollowChanged (
+			UserID   string NOT NULL,
+			User     string NOT NULL
+		);
+		CREATE INDEX UserFollowChangedUserID ON UserFollowChanged (UserID);
+		CREATE INDEX UserFollowChangedUser   ON UserFollowChanged (User);
+	COMMIT;
+	`
+
+	if _, _, err := mem.Run(tctx, query); err != nil {
+		mem.Close()
+		return err
+	}
+
+	// story.published
+
+	// story.voted
+
+	// comment.published
+
+	// comment.voted
+
+	// descendant.published
+
+	processor.mem = mem
+	return nil
+}
+
+func (processor *BlockProcessor) indexReloader(<-chan *users.User) error {
+
 }
 
 //==============================================================================
