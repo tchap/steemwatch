@@ -80,6 +80,11 @@ export class ListComponent implements OnInit, AfterViewChecked {
     // Remove the leading @ in case it is present.
     this.userInput = this.userInput.replace('@', '');
 
+    // Check the value to make sure it is valid.
+    if (!this.userInput.match(/^[a-z][a-z0-9\-]{1,62}[a-z0-9]$/)) {
+      return;
+    }
+
     // Make sure the value is not in the list yet.
     for (let item of this.model) {
       if (item === this.userInput) {
