@@ -572,7 +572,7 @@ func (processor *BlockProcessor) buildDB() error {
 			for _, v := range result.Users {
 				if _, _, err := mem.Run(
 					tctx,
-					`INSERT INTO UserMentioned VALUES ($1, $2)`,
+					`INSERT INTO UserFollowChanged VALUES ($1, $2)`,
 					ownerID, v,
 				); err != nil {
 					mem.Close()
@@ -674,13 +674,13 @@ func (processor *BlockProcessor) buildDB() error {
 				if v.Mode == descendantpublished.SelectorModeDepthLimit {
 					_, _, err = mem.Run(
 						tctx,
-						`INSERT INTO UserMentioned VALUES ($1, $2, $3)`,
-						ownerID, v.ContentID, v.DepthLimit,
+						`INSERT INTO DescendantPublished VALUES ($1, $2, $3)`,
+						ownerID, v.ContentID, uint8(v.DepthLimit),
 					)
 				} else {
 					_, _, err = mem.Run(
 						tctx,
-						`INSERT INTO UserMentioned VALUES ($1, $2, NULL)`,
+						`INSERT INTO DescendantPublished VALUES ($1, $2, NULL)`,
 						ownerID, v.ContentID,
 					)
 				}
