@@ -125,7 +125,7 @@ func eventKindToTableName(kind string) string {
 
 func fieldToRowName(fieldName string) string {
 	switch fieldName {
-	case "authorBacklist":
+	case "authorBlacklist":
 		return "BLAuthor"
 	case "from":
 		return "FromAccount"
@@ -133,7 +133,13 @@ func fieldToRowName(fieldName string) string {
 		return "ToAccount"
 	}
 
-	fieldName = strings.TrimSuffix(fieldName, "s")
+	switch {
+	case strings.HasSuffix(fieldName, "es"):
+		fieldName = strings.TrimSuffix(fieldName, "es")
+	case strings.HasSuffix(fieldName, "s"):
+		fieldName = strings.TrimSuffix(fieldName, "s")
+	}
+
 	fieldName = strings.Title(fieldName)
 	return fieldName
 }
