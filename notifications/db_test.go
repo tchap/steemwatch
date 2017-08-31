@@ -10,19 +10,22 @@ import (
 
 func TestBuildDB(t *testing.T) {
 	port, cleanup := mongo(t)
-	fmt.Println(port)
-	cleanup()
+	defer cleanup()
+
+	mongorestore(t, port)
 }
 
 func mongo(t *testing.T) (string, func()) {
 	t.Helper()
 
+	fmt.Println("---> Starting MongoDB")
 	out, err := exec.Command("docker", "run", "-P", "-d", "--rm", "mongo").Output()
 	if err != nil {
 		t.Fatal(err)
 	}
 	containerID := string(bytes.TrimSpace(out))
 	cleanup := func() {
+		fmt.Println("---> Stopping MongoDB")
 		exec.Command("docker", "stop", containerID).Run()
 	}
 
@@ -40,4 +43,14 @@ func mongo(t *testing.T) (string, func()) {
 	port := parts[1]
 
 	return port, cleanup
+}
+
+func mongorestore(t *testing.T, port string) {
+	t.Helper()
+
+	fmt.Println("---> Running mongorestore")
+	err := exec.Command("mongorestore", "--port", port, "testdata/steemwatch.dump").Run()
+	if err != nil {
+		t.Fatal(err)
+	}
 }
