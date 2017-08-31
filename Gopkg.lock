@@ -129,6 +129,18 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/kr/pretty"
+  packages = ["."]
+  revision = "cfb55aafdaf3ec08f0db22699ab822c50091b1c4"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/kr/text"
+  packages = ["."]
+  revision = "7cafcd837844e784b526369c9bce262804aebc60"
+
+[[projects]]
+  branch = "master"
   name = "github.com/labstack/echo"
   packages = [".","engine","engine/fasthttp","log","middleware"]
   revision = "451b2ccc9ffda7fd7fad2027b75d93b18ff87cbe"
@@ -238,6 +250,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "087b75ab8718933c742417e56781347b543f2046504f0cceeea137e32b6a791e"
+  inputs-digest = "e7c86ce3eba10cf675025b92bd6abf08882e7326f30a6816d0e3639a6f87d3b4"
   solver-name = "gps-cdcl"
   solver-version = 1

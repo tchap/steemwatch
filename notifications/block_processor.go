@@ -13,6 +13,7 @@ import (
 	"github.com/cznic/ql"
 	"github.com/go-steem/rpc"
 	"github.com/go-steem/rpc/apis/database"
+	"github.com/kr/pretty"
 	"github.com/pkg/errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -487,6 +488,7 @@ func (processor *BlockProcessor) buildDB() error {
 	}
 	iter := processor.db.C("events").Find(nil).Iter()
 	for iter.Next(&result) {
+		log.Printf("[notifications] importing %# v", pretty.Formatter(result))
 		ownerID := result.OwnerID.Hex()
 
 		switch result.Kind {
