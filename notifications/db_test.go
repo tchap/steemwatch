@@ -34,6 +34,7 @@ func TestBuildDB(t *testing.T) {
 
 	tctx := ql.NewRWCtx()
 
+	// Make sure that all expected rows exist in the database.
 	iter := db.C("events").Find(nil).Iter()
 	var doc map[string]interface{}
 	for iter.Next(&doc) {
@@ -42,6 +43,7 @@ func TestBuildDB(t *testing.T) {
 		for k, v := range doc {
 			if v, ok := v.([]interface{}); ok {
 				for _, item := range v {
+					t.Logf("(%v, %v, %v, %v)", ownerID, kind, k, item)
 					var (
 						rs  []ql.Recordset
 						err error
