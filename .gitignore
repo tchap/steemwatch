@@ -1,3 +1,4 @@
 steemwatch
 *.sh
 vendor
+.env
