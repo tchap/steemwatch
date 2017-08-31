@@ -479,6 +479,7 @@ func (processor *BlockProcessor) buildDB() error {
 		To              []string                       `bson:"to"`
 		Users           []string                       `bson:"users"`
 		AuthorBlacklist []string                       `bson:"authorBlacklist"`
+		Authors         []string                       `bson:"authors"`
 		Tags            []string                       `bson:"tags"`
 		Voters          []string                       `bson:"voters"`
 		ParentAuthors   []string                       `bson:"parentAuthors"`
@@ -546,20 +547,151 @@ func (processor *BlockProcessor) buildDB() error {
 			}
 
 		case "user.mentioned":
+			for _, v := range result.Users {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO UserMentioned VALUES ($1, $2, NULL)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
+			for _, v := range result.AuthorBlacklist {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO UserMentioned VALUES ($1, NULL, $2)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
 
 		case "user.follow_changed":
+			for _, v := range result.Users {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO UserMentioned VALUES ($1, $2)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
 
 		case "story.published":
+			for _, v := range result.Authors {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO StoryPublished VALUES ($1, $2, NULL)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
+			for _, v := range result.Tags {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO StoryPublished VALUES ($1, NULL, $2)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
 
 		case "story.voted":
+			for _, v := range result.Authors {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO StoryVoted VALUES ($1, $2, NULL)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
+			for _, v := range result.Voters {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO StoryVoted VALUES ($1, NULL, $2)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
 
 		case "comment.published":
+			for _, v := range result.Authors {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO CommentPublished VALUES ($1, $2, NULL)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
+			for _, v := range result.ParentAuthors {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO CommentPublished VALUES ($1, NULL, $2)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
 
 		case "comment.voted":
+			for _, v := range result.Authors {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO CommentVoted VALUES ($1, $2, NULL)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
+			for _, v := range result.Voters {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO CommentVoted VALUES ($1, NULL, $2)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
 
 		case "descendant.published":
+			for _, v := range result.Selectors {
+				var err error
+				if v.Mode == descendantpublished.SelectorModeDepthLimit {
+					_, _, err = mem.Run(
+						tctx,
+						`INSERT INTO UserMentioned VALUES ($1, $2, $3)`,
+						ownerID, v.ContentID, v.DepthLimit,
+					)
+				} else {
+					_, _, err = mem.Run(
+						tctx,
+						`INSERT INTO UserMentioned VALUES ($1, $2, NULL)`,
+						ownerID, v.ContentID,
+					)
+				}
+				if err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
 
 		default:
+			log.Printf("[notifications] unknown event kind: %v", result.Kind)
 		}
 	}
 	if err := iter.Err(); err != nil {
