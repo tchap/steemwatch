@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cznic/ql"
+
 	mgo "gopkg.in/mgo.v2"
 )
 
@@ -21,11 +23,47 @@ func TestBuildDB(t *testing.T) {
 	}
 	defer session.Close()
 
-	mem, err := buildDB(session.DB("steemwatch"))
+	db := session.DB("steemwatch")
+	mem, err := buildDB(db)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer mem.Close()
+
+	iter := db.C("events").Find(nil).Iter()
+	var doc map[string]interface{}
+	numRowsByEventKind := make(map[string]int)
+	for iter.Next(&doc) {
+		kind := doc["kind"].(string)
+		for _, v := range doc {
+			if v, ok := v.([]interface{}); ok {
+				num := numRowsByEventKind[kind]
+				num += len(v)
+				numRowsByEventKind[kind] = num
+			}
+		}
+	}
+	if err := iter.Err(); err != nil {
+		t.Fatal(err)
+	}
+
+	// Count rows in QL.
+	tctx := ql.NewRWCtx()
+	for k, v := range numRowsByEventKind {
+		table := eventKindToTableName(k)
+		rs, _, err := mem.Run(tctx, "SELECT count(*) FROM "+table)
+		if err != nil {
+			t.Fatal(err)
+		}
+		row, err := rs[0].FirstRow()
+		if err != nil {
+			t.Fatal(err)
+		}
+		count := row[0].(int64)
+		if count != int64(v) {
+			t.Errorf("row count mismatch for %v: expected %v, got %v", k, v, count)
+		}
+	}
 }
 
 func mongo(t *testing.T) (string, func()) {
@@ -63,4 +101,12 @@ func mongorestore(t *testing.T, port string) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func eventKindToTableName(kind string) string {
+	kind = strings.Replace(kind, ".", " ", -1)
+	kind = strings.Replace(kind, "_", " ", -1)
+	kind = strings.Title(kind)
+	kind = strings.Replace(kind, " ", "", -1)
+	return kind
 }
