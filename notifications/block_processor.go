@@ -266,13 +266,13 @@ func (processor *BlockProcessor) flushConfig(config *BlockProcessorConfig) error
 }
 
 //==============================================================================
-// User data in-memory indexes
+// Metadata in-memory database
 //==============================================================================
 
 func (processor *BlockProcessor) buildDB() error {
 	mem, err := ql.OpenMem()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to open a QL in-memory database")
 	}
 
 	tctx := ql.NewRWCtx()
@@ -291,7 +291,7 @@ func (processor *BlockProcessor) buildDB() error {
 
 	if _, _, err := mem.Run(tctx, query); err != nil {
 		mem.Close()
-		return err
+		return errors.Wrap(err, "failed to create a table")
 	}
 
 	// account.witness_voted
@@ -310,7 +310,7 @@ func (processor *BlockProcessor) buildDB() error {
 
 	if _, _, err := mem.Run(tctx, query); err != nil {
 		mem.Close()
-		return err
+		return errors.Wrap(err, "failed to create a table")
 	}
 
 	// transfer.made
@@ -329,7 +329,7 @@ func (processor *BlockProcessor) buildDB() error {
 
 	if _, _, err := mem.Run(tctx, query); err != nil {
 		mem.Close()
-		return err
+		return errors.Wrap(err, "failed to create a table")
 	}
 
 	// user.mentioned
@@ -348,15 +348,15 @@ func (processor *BlockProcessor) buildDB() error {
 
 	if _, _, err := mem.Run(tctx, query); err != nil {
 		mem.Close()
-		return err
+		return errors.Wrap(err, "failed to create a table")
 	}
 
 	// user.follow_changed
 	query = `
 	BEGIN TRANSACTION;
 		CREATE TABLE UserFollowChanged (
-			UserID   string NOT NULL,
-			User     string NOT NULL
+			UserID string NOT NULL,
+			User   string NOT NULL
 		);
 		CREATE INDEX UserFollowChangedUserID ON UserFollowChanged (UserID);
 		CREATE INDEX UserFollowChangedUser   ON UserFollowChanged (User);
@@ -365,18 +365,102 @@ func (processor *BlockProcessor) buildDB() error {
 
 	if _, _, err := mem.Run(tctx, query); err != nil {
 		mem.Close()
-		return err
+		return errors.Wrap(err, "failed to create a table")
 	}
 
 	// story.published
+	query = `
+	BEGIN TRANSACTION;
+		CREATE TABLE StoryPublished (
+			UserID string NOT NULL,
+			Author string,
+			Tag    string
+		);
+		CREATE INDEX StoryPublishedUserID ON StoryPublished (UserID);
+		CREATE INDEX StoryPublishedAuthor ON StoryPublished (Author);
+		CREATE INDEX StoryPublishedTag    ON StoryPublished (Tag);
+	COMMIT;
+	`
+
+	if _, _, err := mem.Run(tctx, query); err != nil {
+		mem.Close()
+		return errors.Wrap(err, "failed to create a table")
+	}
 
 	// story.voted
+	query = `
+	BEGIN TRANSACTION;
+		CREATE TABLE StoryVoted (
+			UserID string NOT NULL,
+			Author string,
+			Voter  string
+		);
+		CREATE INDEX StoryVotedUserID ON StoryVoted (UserID);
+		CREATE INDEX StoryVotedAuthor ON StoryVoted (Author);
+		CREATE INDEX StoryVotedVoter  ON StoryVoted (Voter);
+	COMMIT;
+	`
+
+	if _, _, err := mem.Run(tctx, query); err != nil {
+		mem.Close()
+		return errors.Wrap(err, "failed to create a table")
+	}
 
 	// comment.published
+	query = `
+	BEGIN TRANSACTION;
+		CREATE TABLE CommentPublished (
+			UserID       string NOT NULL,
+			Author       string,
+			ParentAuthor string
+		);
+		CREATE INDEX CommentPublishedUserID       ON CommentPublished (UserID);
+		CREATE INDEX CommentPublishedAuthor       ON CommentPublished (Author);
+		CREATE INDEX CommentPublishedParentAuthor ON CommentPublished (ParentAuthor);
+	COMMIT;
+	`
+
+	if _, _, err := mem.Run(tctx, query); err != nil {
+		mem.Close()
+		return errors.Wrap(err, "failed to create a table")
+	}
 
 	// comment.voted
+	query = `
+	BEGIN TRANSACTION;
+		CREATE TABLE CommentVoted (
+			UserID string NOT NULL,
+			Author string,
+			Voter  string
+		);
+		CREATE INDEX CommentVotedUserID ON CommentVoted (UserID);
+		CREATE INDEX CommentVotedAuthor ON CommentVoted (Author);
+		CREATE INDEX CommentVotedVoter  ON CommentVoted (Voter);
+	COMMIT;
+	`
+
+	if _, _, err := mem.Run(tctx, query); err != nil {
+		mem.Close()
+		return errors.Wrap(err, "failed to create a table")
+	}
 
 	// descendant.published
+	query = `
+	BEGIN TRANSACTION;
+		CREATE TABLE DescendantPublished (
+			UserID     string NOT NULL,
+			ContentID  string,
+			DepthLimit uint8
+		);
+		CREATE INDEX DescendantPublishedUserID   ON DescendantPublished (UserID);
+		CREATE INDEX DescendantPublishedContenID ON DescendantPublished (Author);
+	COMMIT;
+	`
+
+	if _, _, err := mem.Run(tctx, query); err != nil {
+		mem.Close()
+		return errors.Wrap(err, "failed to create a table")
+	}
 
 	processor.mem = mem
 	return nil
