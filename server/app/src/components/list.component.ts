@@ -77,6 +77,9 @@ export class ListComponent implements OnInit, AfterViewChecked {
       return;
     }
 
+    // Remove the leading @ in case it is present.
+    this.userInput = this.userInput.replace('@', '');
+
     // Make sure the value is not in the list yet.
     for (let item of this.model) {
       if (item === this.userInput) {
