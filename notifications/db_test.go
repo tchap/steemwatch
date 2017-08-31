@@ -2,10 +2,11 @@ package notifications
 
 import (
 	"bytes"
-	"fmt"
 	"os/exec"
 	"strings"
 	"testing"
+
+	mgo "gopkg.in/mgo.v2"
 )
 
 func TestBuildDB(t *testing.T) {
@@ -13,19 +14,29 @@ func TestBuildDB(t *testing.T) {
 	defer cleanup()
 
 	mongorestore(t, port)
+
+	session, err := mgo.Dial("localhost:" + port)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer session.Close()
+
+	mem, err := buildDB(session.DB("steemwatch"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer mem.Close()
 }
 
 func mongo(t *testing.T) (string, func()) {
 	t.Helper()
 
-	fmt.Println("---> Starting MongoDB")
 	out, err := exec.Command("docker", "run", "-P", "-d", "--rm", "mongo").Output()
 	if err != nil {
 		t.Fatal(err)
 	}
 	containerID := string(bytes.TrimSpace(out))
 	cleanup := func() {
-		fmt.Println("---> Stopping MongoDB")
 		exec.Command("docker", "stop", containerID).Run()
 	}
 
@@ -48,7 +59,6 @@ func mongo(t *testing.T) (string, func()) {
 func mongorestore(t *testing.T, port string) {
 	t.Helper()
 
-	fmt.Println("---> Running mongorestore")
 	err := exec.Command("mongorestore", "--port", port, "testdata/steemwatch.dump").Run()
 	if err != nil {
 		t.Fatal(err)
