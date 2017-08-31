@@ -47,15 +47,29 @@ func TestBuildDB(t *testing.T) {
 						err error
 					)
 					if kind == "descendant.published" {
-						continue
+						item := item.(map[string]interface{})
+						depthLimit := item["depthLimit"]
+						if depthLimit != nil {
+							depthLimit = fmt.Sprintf("== %v", depthLimit)
+						} else {
+							depthLimit = "IS NULL"
+						}
+						rs, _, err = mem.Run(
+							tctx,
+							fmt.Sprintf(`
+								SELECT count(*)
+								FROM %v
+								WHERE UserID == $1 AND ContentID == $2 AND DepthLimit %v
+							`, eventKindToTableName(kind), depthLimit),
+							ownerID.Hex(), item["contentID"])
 					} else {
 						rs, _, err = mem.Run(
 							tctx,
 							fmt.Sprintf(`
-							SELECT count(*)
-							FROM %v
-							WHERE UserID == $1 AND %v == $2
-						`, eventKindToTableName(kind), fieldToRowName(k)),
+								SELECT count(*)
+								FROM %v
+								WHERE UserID == $1 AND %v == $2
+							`, eventKindToTableName(kind), fieldToRowName(k)),
 							ownerID.Hex(), item)
 					}
 					if err != nil {
