@@ -280,7 +280,7 @@ func (processor *BlockProcessor) buildDB() error {
 	// account.updated
 	query := `
 	BEGIN TRANSACTION;
-		CREATE TABLE AccountUpdated_Account (
+		CREATE TABLE AccountUpdated (
 			UserID  string NOT NULL,
 			Account string NOT NULL
 		);
@@ -317,13 +317,13 @@ func (processor *BlockProcessor) buildDB() error {
 	query = `
 	BEGIN TRANSACTION;
 		CREATE TABLE TransferMade (
-			UserID  string NOT NULL,
-			From    string,
-			To      string
+			UserID      string NOT NULL,
+			FromAccount string,
+			ToAccount   string
 		);
-		CREATE INDEX TransferMadeUserID ON TransferMade (UserID);
-		CREATE INDEX TransferMadeFrom   ON TransferMade (From);
-		CREATE INDEX TransferMadeTo     ON TransferMade (To);
+		CREATE INDEX TransferMadeUserID      ON TransferMade (UserID);
+		CREATE INDEX TransferMadeFromAccount ON TransferMade (FromAccount);
+		CREATE INDEX TransferMadeToAccount   ON TransferMade (ToAccount);
 	COMMIT;
 	`
 
@@ -453,7 +453,7 @@ func (processor *BlockProcessor) buildDB() error {
 			DepthLimit uint8
 		);
 		CREATE INDEX DescendantPublishedUserID   ON DescendantPublished (UserID);
-		CREATE INDEX DescendantPublishedContenID ON DescendantPublished (Author);
+		CREATE INDEX DescendantPublishedContenID ON DescendantPublished (ContentID);
 	COMMIT;
 	`
 
