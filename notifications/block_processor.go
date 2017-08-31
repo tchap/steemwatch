@@ -270,6 +270,8 @@ func (processor *BlockProcessor) flushConfig(config *BlockProcessorConfig) error
 //==============================================================================
 
 func (processor *BlockProcessor) buildDB() error {
+	start := time.Now()
+
 	mem, err := ql.OpenMem()
 	if err != nil {
 		return errors.Wrap(err, "failed to open a QL in-memory database")
@@ -461,6 +463,8 @@ func (processor *BlockProcessor) buildDB() error {
 		mem.Close()
 		return errors.Wrap(err, "failed to create a table")
 	}
+
+	log.Printf("notifications: internal DB initialized, it took %v", time.Since(start))
 
 	processor.mem = mem
 	return nil
