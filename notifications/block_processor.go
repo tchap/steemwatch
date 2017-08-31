@@ -465,8 +465,13 @@ func (processor *BlockProcessor) buildDB() error {
 	}
 
 	// Now we need to fill the database.
+	if _, _, err := mem.Run(tctx, "BEGIN TRANSACTION"); err != nil {
+		mem.Close()
+		return errors.Wrap(err, "failed to begin a transaction")
+	}
+
 	var result struct {
-		OwnerId         bson.ObjectId                  `bson:"ownerId"`
+		OwnerID         bson.ObjectId                  `bson:"ownerId"`
 		Kind            string                         `bson:"kind"`
 		Accounts        []string                       `bson:"accounts"`
 		Witnesses       []string                       `bson:"witnesses"`
@@ -481,9 +486,91 @@ func (processor *BlockProcessor) buildDB() error {
 	}
 	iter := processor.db.C("events").Find(nil).Iter()
 	for iter.Next(&result) {
-		// Do some bullshit.
+		ownerID := result.OwnerID.Hex()
+
+		switch result.Kind {
+		case "account.updated":
+			for _, v := range result.Accounts {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO AccountUpdated VALUES ($1, $2)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
+
+		case "account.witness_voted":
+			for _, v := range result.Accounts {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO AccountWitnessVoted VALUES ($1, $2, NULL)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
+			for _, v := range result.Witnesses {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO AccountWitnessVoted VALUES ($1, NULL, $2)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
+
+		case "transfer.made":
+			for _, v := range result.From {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO TransferMade VALUES ($1, $2, NULL)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
+			for _, v := range result.To {
+				if _, _, err := mem.Run(
+					tctx,
+					`INSERT INTO TransferMade VALUES ($1, NULL, $2)`,
+					ownerID, v,
+				); err != nil {
+					mem.Close()
+					return errors.Wrap(err, "failed to insert internal DB value")
+				}
+			}
+
+		case "user.mentioned":
+
+		case "user.follow_changed":
+
+		case "story.published":
+
+		case "story.voted":
+
+		case "comment.published":
+
+		case "comment.voted":
+
+		case "descendant.published":
+
+		default:
+		}
 	}
-	return errors.Wrap(iter.Err(), "failed get all event documents")
+	if err := iter.Err(); err != nil {
+		mem.Close()
+		return errors.Wrap(err, "failed get all event documents")
+	}
+
+	if _, _, err := mem.Run(tctx, "COMMIT"); err != nil {
+		mem.Close()
+		return errors.Wrap(err, "failed to commit the transaction")
+	}
 
 	log.Printf("notifications: internal DB initialized, it took %v", time.Since(start))
 	processor.mem = mem
