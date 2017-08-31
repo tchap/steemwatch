@@ -3,7 +3,6 @@ import { Component, Input } from '@angular/core';
 import { Event } from '../../../interfaces';
 
 import { EventListItemComponent }  from './event-list-item.component';
-import { ContentSubtreeComponent } from './content-subtree.component';
 
 
 @Component({
@@ -15,11 +14,9 @@ import { ContentSubtreeComponent } from './content-subtree.component';
         [path]="['events', event.id]"
       >
       </event-list-item>
-
-      <content-subtree></content-subtree>
     </div>
   `,
-  directives: [EventListItemComponent, ContentSubtreeComponent]
+  directives: [EventListItemComponent]
 })
 export class EventListComponent {
 

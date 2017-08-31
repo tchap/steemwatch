@@ -12,7 +12,6 @@ import (
 	"github.com/tchap/steemwatch/server/auth/reddit"
 	"github.com/tchap/steemwatch/server/context"
 	"github.com/tchap/steemwatch/server/db"
-	"github.com/tchap/steemwatch/server/routes/api/events/descendantpublished"
 	"github.com/tchap/steemwatch/server/routes/api/eventstream"
 	"github.com/tchap/steemwatch/server/routes/api/notifiers/slack"
 	"github.com/tchap/steemwatch/server/routes/api/notifiers/steemitchat"
@@ -150,7 +149,6 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 	api := e.Group("/api", auth.Required(serverCtx))
 
 	// API - Events
-	descendantpublished.Bind(serverCtx, api.Group("/events/descendant.published"))
 	db.BindList(serverCtx, api.Group("/events/:kind/:list"))
 
 	// API - Event Stream
