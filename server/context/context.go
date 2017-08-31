@@ -4,7 +4,6 @@ import (
 	"net/url"
 
 	"github.com/tchap/steemwatch/server/sessions"
-	"github.com/tchap/steemwatch/server/users"
 
 	"gopkg.in/mgo.v2"
 )
@@ -22,5 +21,4 @@ type Context struct {
 	SessionManager *sessions.SessionManager
 	DB             *mgo.Database
 	SSLEnabled     bool
-	UserChangedCh  chan<- *users.User
 }

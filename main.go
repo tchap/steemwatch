@@ -10,7 +10,6 @@ import (
 	"github.com/tchap/steemwatch/config"
 	"github.com/tchap/steemwatch/notifications"
 	"github.com/tchap/steemwatch/server"
-	"github.com/tchap/steemwatch/server/users"
 
 	"github.com/go-steem/rpc"
 	"github.com/go-steem/rpc/transports/websocket"
@@ -48,17 +47,14 @@ func _main() error {
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
 
-	// Initialize the user changed channel that connects the API and notifications.
-	userChangedCh := make(chan *users.User)
-
 	// Start the web server.
-	serverCtx, err := server.Run(wDB, cfg, userChangedCh)
+	serverCtx, err := server.Run(wDB, cfg)
 	if err != nil {
 		return err
 	}
 
 	// Start notifications.
-	notificationsCtx, client, err := runNotifications(nDB, cfg, userChangedCh,
+	notificationsCtx, client, err := runNotifications(nDB, cfg,
 		notifications.AddNotifier("websocket", serverCtx.EventStreamManager))
 	if err != nil {
 		return err
@@ -112,7 +108,6 @@ func _main() error {
 func runNotifications(
 	db *mgo.Database,
 	cfg *config.Config,
-	userChangedCh <-chan *users.User,
 	opts ...notifications.Option,
 ) (*blockfetcher.Context, *rpc.Client, error) {
 
@@ -140,7 +135,7 @@ func runNotifications(
 	client := rpc.NewClient(t)
 
 	// Start the block processor.
-	ctx, err := notifications.Run(client, db, userChangedCh, opts...)
+	ctx, err := notifications.Run(client, db, opts...)
 	if err != nil {
 		client.Close()
 		return nil, nil, err

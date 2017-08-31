@@ -21,7 +21,6 @@ import (
 	"github.com/tchap/steemwatch/server/routes/home"
 	"github.com/tchap/steemwatch/server/routes/logout"
 	"github.com/tchap/steemwatch/server/sessions"
-	"github.com/tchap/steemwatch/server/users"
 	"github.com/tchap/steemwatch/server/users/stores/mongodb"
 	"github.com/tchap/steemwatch/server/views"
 
@@ -42,10 +41,8 @@ type Context struct {
 	t tomb.Tomb
 }
 
-func Run(mongo *mgo.Database, cfg *config.Config, userChangedCh chan<- *users.User) (*Context, error) {
-	serverCtx := &context.Context{
-		UserChangedCh: userChangedCh,
-	}
+func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
+	serverCtx := &context.Context{}
 
 	// Environment.
 	switch cfg.Env {

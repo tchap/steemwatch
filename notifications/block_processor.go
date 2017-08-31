@@ -8,7 +8,6 @@ import (
 
 	"github.com/tchap/steemwatch/notifications/events"
 	"github.com/tchap/steemwatch/server/routes/api/events/descendantpublished"
-	"github.com/tchap/steemwatch/server/users"
 
 	"github.com/cznic/ql"
 	"github.com/go-steem/rpc"
@@ -69,7 +68,6 @@ func AddNotifier(id string, notifier Notifier) Option {
 func New(
 	client *rpc.Client,
 	db *mgo.Database,
-	userChangedCh <-chan *users.User,
 	opts ...Option,
 ) (*BlockProcessor, error) {
 	// Load config from the database.
@@ -136,11 +134,6 @@ func New(
 
 	// Start the config flusher.
 	processor.t.Go(processor.configFlusher)
-
-	// Start the index reloader.
-	processor.t.Go(func() error {
-		return processor.indexReloader(userChangedCh)
-	})
 
 	// Return the new BlockProcessor.
 	return processor, nil
@@ -708,10 +701,6 @@ func (processor *BlockProcessor) buildDB() error {
 
 	log.Printf("notifications: internal DB initialized, it took %v", time.Since(start))
 	processor.mem = mem
-	return nil
-}
-
-func (processor *BlockProcessor) indexReloader(<-chan *users.User) error {
 	return nil
 }
 
