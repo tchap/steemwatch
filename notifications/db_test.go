@@ -2,6 +2,7 @@ package notifications
 
 import (
 	"bytes"
+	"fmt"
 	"os/exec"
 	"strings"
 	"testing"
@@ -9,6 +10,7 @@ import (
 	"github.com/cznic/ql"
 
 	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 func TestBuildDB(t *testing.T) {
@@ -30,39 +32,49 @@ func TestBuildDB(t *testing.T) {
 	}
 	defer mem.Close()
 
+	tctx := ql.NewRWCtx()
+
 	iter := db.C("events").Find(nil).Iter()
 	var doc map[string]interface{}
-	numRowsByEventKind := make(map[string]int)
 	for iter.Next(&doc) {
+		ownerID := doc["ownerId"].(bson.ObjectId)
 		kind := doc["kind"].(string)
-		for _, v := range doc {
+		for k, v := range doc {
 			if v, ok := v.([]interface{}); ok {
-				num := numRowsByEventKind[kind]
-				num += len(v)
-				numRowsByEventKind[kind] = num
+				for _, item := range v {
+					var (
+						rs  []ql.Recordset
+						err error
+					)
+					if kind == "descendant.published" {
+						continue
+					} else {
+						rs, _, err = mem.Run(
+							tctx,
+							fmt.Sprintf(`
+							SELECT count(*)
+							FROM %v
+							WHERE UserID == $1 AND %v == $2
+						`, eventKindToTableName(kind), fieldToRowName(k)),
+							ownerID.Hex(), item)
+					}
+					if err != nil {
+						t.Fatal(err)
+					}
+					row, err := rs[0].FirstRow()
+					if err != nil {
+						t.Fatal(err)
+					}
+					count := row[0].(int64)
+					if count != 1 {
+						t.Errorf("row missing [ownerID = %v, kind = %v, %v = %v]", ownerID, kind, k, item)
+					}
+				}
 			}
 		}
 	}
 	if err := iter.Err(); err != nil {
 		t.Fatal(err)
-	}
-
-	// Count rows in QL.
-	tctx := ql.NewRWCtx()
-	for k, v := range numRowsByEventKind {
-		table := eventKindToTableName(k)
-		rs, _, err := mem.Run(tctx, "SELECT count(*) FROM "+table)
-		if err != nil {
-			t.Fatal(err)
-		}
-		row, err := rs[0].FirstRow()
-		if err != nil {
-			t.Fatal(err)
-		}
-		count := row[0].(int64)
-		if count != int64(v) {
-			t.Errorf("row count mismatch for %v: expected %v, got %v", k, v, count)
-		}
 	}
 }
 
@@ -109,4 +121,19 @@ func eventKindToTableName(kind string) string {
 	kind = strings.Title(kind)
 	kind = strings.Replace(kind, " ", "", -1)
 	return kind
+}
+
+func fieldToRowName(fieldName string) string {
+	switch fieldName {
+	case "authorBacklist":
+		return "BLAuthor"
+	case "from":
+		return "FromAccount"
+	case "to":
+		return "ToAccount"
+	}
+
+	fieldName = strings.TrimSuffix(fieldName, "s")
+	fieldName = strings.Title(fieldName)
+	return fieldName
 }
