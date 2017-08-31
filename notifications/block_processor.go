@@ -464,8 +464,28 @@ func (processor *BlockProcessor) buildDB() error {
 		return errors.Wrap(err, "failed to create a table")
 	}
 
-	log.Printf("notifications: internal DB initialized, it took %v", time.Since(start))
+	// Now we need to fill the database.
+	var result struct {
+		OwnerId         bson.ObjectId                  `bson:"ownerId"`
+		Kind            string                         `bson:"kind"`
+		Accounts        []string                       `bson:"accounts"`
+		Witnesses       []string                       `bson:"witnesses"`
+		From            []string                       `bson:"from"`
+		To              []string                       `bson:"to"`
+		Users           []string                       `bson:"users"`
+		AuthorBlacklist []string                       `bson:"authorBlacklist"`
+		Tags            []string                       `bson:"tags"`
+		Voters          []string                       `bson:"voters"`
+		ParentAuthors   []string                       `bson:"parentAuthors"`
+		Selectors       []descendantpublished.Selector `bson:"selectors"`
+	}
+	iter := processor.db.C("events").Find(nil).Iter()
+	for iter.Next(&result) {
+		// Do some bullshit.
+	}
+	return errors.Wrap(iter.Err(), "failed get all event documents")
 
+	log.Printf("notifications: internal DB initialized, it took %v", time.Since(start))
 	processor.mem = mem
 	return nil
 }
