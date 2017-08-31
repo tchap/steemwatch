@@ -467,7 +467,7 @@ func (processor *BlockProcessor) buildDB() error {
 }
 
 func (processor *BlockProcessor) indexReloader(<-chan *users.User) error {
-
+	return nil
 }
 
 //==============================================================================
