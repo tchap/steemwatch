@@ -1,8 +1,11 @@
 package server
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"net"
 	"net/url"
+	"strings"
 
 	"github.com/tchap/steemwatch/config"
 	"github.com/tchap/steemwatch/server/auth"
@@ -15,6 +18,7 @@ import (
 	"github.com/tchap/steemwatch/server/routes/api/eventstream"
 	"github.com/tchap/steemwatch/server/routes/api/notifiers/slack"
 	"github.com/tchap/steemwatch/server/routes/api/notifiers/steemitchat"
+	"github.com/tchap/steemwatch/server/routes/api/notifiers/telegram"
 	"github.com/tchap/steemwatch/server/routes/api/profile"
 	"github.com/tchap/steemwatch/server/routes/api/v1/info"
 	"github.com/tchap/steemwatch/server/routes/home"
@@ -23,6 +27,7 @@ import (
 	"github.com/tchap/steemwatch/server/users/stores/mongodb"
 	"github.com/tchap/steemwatch/server/views"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine"
 	"github.com/labstack/echo/engine/fasthttp"
@@ -103,50 +108,51 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 	e.Pre(middleware.AddTrailingSlash())
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.Use(middleware.CSRF([]byte("secret")))
 	e.Use(middleware.Secure())
+
+	csrf := middleware.CSRF([]byte("secret"))
 
 	// Web
 	homeHandler := home.NewHandlerFunc(serverCtx)
 
-	e.GET("/", homeHandler)
-	e.GET("/logout/", logout.NewHandlerFunc(serverCtx))
+	e.GET("/", homeHandler, csrf)
+	e.GET("/logout/", logout.NewHandlerFunc(serverCtx), csrf)
 
-	e.GET("/home/", homeHandler)
-	e.GET("/events/", homeHandler)
-	e.GET("/eventstream/", homeHandler)
-	e.GET("/notifications/", homeHandler)
-	e.GET("/profile/", homeHandler)
+	e.GET("/home/", homeHandler, csrf)
+	e.GET("/events/", homeHandler, csrf)
+	e.GET("/eventstream/", homeHandler, csrf)
+	e.GET("/notifications/", homeHandler, csrf)
+	e.GET("/profile/", homeHandler, csrf)
 
 	facebookCallbackPath, _ := url.Parse("/auth/facebook/callback")
 	facebookCallback := serverCtx.CanonicalURL.ResolveReference(facebookCallbackPath).String()
 	facebookAuth := facebook.NewAuthenticator(
 		cfg.FacebookClientId, cfg.FacebookClientSecret, facebookCallback)
-	auth.Bind(serverCtx, e.Group("/auth/facebook"), facebookAuth)
+	auth.Bind(serverCtx, e.Group("/auth/facebook", csrf), facebookAuth)
 
 	redditCallbackPath, _ := url.Parse("/auth/reddit/callback")
 	redditCallback := serverCtx.CanonicalURL.ResolveReference(redditCallbackPath).String()
 	redditAuth := reddit.NewAuthenticator(
 		cfg.RedditClientId, cfg.RedditClientSecret, redditCallback, serverCtx.SSLEnabled)
-	auth.Bind(serverCtx, e.Group("/auth/reddit"), redditAuth)
+	auth.Bind(serverCtx, e.Group("/auth/reddit", csrf), redditAuth)
 
 	googleCallbackPath, _ := url.Parse("/auth/google/callback")
 	googleCallback := serverCtx.CanonicalURL.ResolveReference(googleCallbackPath).String()
 	googleAuth := google.NewAuthenticator(
 		cfg.GoogleClientId, cfg.GoogleClientSecret, googleCallback)
-	auth.Bind(serverCtx, e.Group("/auth/google"), googleAuth)
+	auth.Bind(serverCtx, e.Group("/auth/google", csrf), googleAuth)
 
 	githubCallbackPath, _ := url.Parse("/auth/github/callback")
 	githubCallback := serverCtx.CanonicalURL.ResolveReference(githubCallbackPath).String()
 	githubAuth := github.NewAuthenticator(
 		cfg.GitHubClientId, cfg.GitHubClientSecret, githubCallback)
-	auth.Bind(serverCtx, e.Group("/auth/github"), githubAuth)
+	auth.Bind(serverCtx, e.Group("/auth/github", csrf), githubAuth)
 
 	// Public API
 	info.Bind(serverCtx, e.Group("/api/v1/info"))
 
 	// API
-	api := e.Group("/api", auth.Required(serverCtx))
+	api := e.Group("/api", csrf, auth.Required(serverCtx))
 
 	// API - Events
 	db.BindList(serverCtx, api.Group("/events/:kind/:list"))
@@ -158,6 +164,30 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 	// API - Notifiers
 	slack.Bind(serverCtx, api.Group("/notifiers/slack"))
 	steemitchat.Bind(serverCtx, api.Group("/notifiers/steemit-chat"))
+
+	// Telegram
+	botSecret := make([]byte, 256/8)
+	if _, err := rand.Read(botSecret); err != nil {
+		return nil, errors.Wrap(err, "failed to generate Telegram bot secret")
+	}
+	botSecretHex := hex.EncodeToString(botSecret)
+
+	botURL, _ := url.Parse("/bots/telegram/both-" + botSecretHex)
+	botWebhookURL := serverCtx.CanonicalURL.ResolveReference(botURL)
+
+	bot, err := tgbotapi.NewBotAPI(cfg.TelegramBotToken)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to initialize Telegram bot")
+	}
+
+	if !strings.Contains(cfg.CanonicalURL, "localhost") {
+		if _, err := bot.SetWebhook(tgbotapi.NewWebhook(botWebhookURL.String())); err != nil {
+			return nil, errors.Wrap(err, "failed to register Telegram webhook URL")
+		}
+	}
+
+	telegram.BindWebhook(serverCtx, e.Group(botURL.String()))
+	telegram.BindAPI(serverCtx, api.Group("/notifiers/telegram"))
 
 	// API - Profile
 	profile.Bind(serverCtx, api.Group("/profile"))

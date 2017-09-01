@@ -20,6 +20,12 @@
   revision = "30a413fc99f7fa9047311d76197fd267a4bb9c79"
 
 [[projects]]
+  name = "github.com/go-telegram-bot-api/telegram-bot-api"
+  packages = ["."]
+  revision = "0a57807db79efce7f6719fbb2c0e0f83fda79aec"
+  version = "v4.6"
+
+[[projects]]
   branch = "master"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
@@ -69,6 +75,18 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/kr/pretty"
+  packages = ["."]
+  revision = "cfb55aafdaf3ec08f0db22699ab822c50091b1c4"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/kr/text"
+  packages = ["."]
+  revision = "7cafcd837844e784b526369c9bce262804aebc60"
+
+[[projects]]
+  branch = "master"
   name = "github.com/labstack/echo"
   packages = [".","engine","engine/fasthttp","log","middleware"]
   revision = "451b2ccc9ffda7fd7fad2027b75d93b18ff87cbe"
@@ -114,6 +132,12 @@
   name = "github.com/tchap/websocket"
   packages = ["."]
   revision = "efccbc339158bd22a3c5ec9781345e713ec25e51"
+
+[[projects]]
+  name = "github.com/technoweenie/multipartstreamer"
+  packages = ["."]
+  revision = "a90a01d73ae432e2611d178c18367fbaa13e0154"
+  version = "v1.0.1"
 
 [[projects]]
   branch = "master"
@@ -178,6 +202,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2a06dab12718d7404e6231c2706bde61759a5df599226b480061b71042792b6e"
+  inputs-digest = "188744d450313441de19955b811d0f5f7669a7b01e28f88679531b517a7e9a9f"
   solver-name = "gps-cdcl"
   solver-version = 1

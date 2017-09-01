@@ -34,8 +34,16 @@
   name = "github.com/gorilla/securecookie"
 
 [[constraint]]
+  name = "github.com/go-telegram-bot-api/telegram-bot-api"
+  version = "4.6.0"
+
+[[constraint]]
   branch = "master"
   name = "github.com/kelseyhightower/envconfig"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/kr/pretty"
 
 [[constraint]]
   branch = "master"

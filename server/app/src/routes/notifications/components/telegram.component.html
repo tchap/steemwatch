@@ -1,0 +1,68 @@
+<div>
+  <hr />
+  <h2><img src="/assets/img/Telegram_Messenger-64x64.png" class="logo"> Telegram</h2>
+
+  <div *ngIf="!model">
+    <img src="/assets/img/loading.gif" />
+  </div>
+  <div *ngIf="model">
+    <div *ngIf="model.settings.firstName || model.settings.lastName">
+      <p>
+        Telegram account linked: {{model.settings.firstName}} {{model.settings.lastName}} {{model.settings.username}}
+      </p>
+      <div class="buttons">
+        <button *ngIf="model.enabled" class="btn btn-warning" (click)="setEnabled(false)">
+         Disable
+        </button>
+        <div *ngIf="!model.enabled">
+          <button *ngIf="!model.enabled" class="btn btn-success" (click)="setEnabled(true)">
+            Enable
+          </button>
+          <button class="btn btn-warning" (click)="disconnect()">
+            Disconnect
+          </button>
+        </div>
+
+        <span class="api-error-wrapper" *ngIf="errorMessage">
+            <span class="api-error">
+              Error: {{errorMessage}}
+            </span>
+          </span>
+          <img *ngIf="processing"
+            src="/assets/img/loading.gif"
+            class="loading-small" />
+      </div>
+    </div>
+    <div *ngIf="!(model.settings.firstName || model.settings.lastName)">
+      <p>No Telegram account linked yet.</p>
+      <p>
+        You can enable Telegram by either clicking <strong>Enable</strong> or sending
+        <strong>/start {{model.settings.startToken}}</strong> to @SteemWatchBot.
+      </p>
+      <p>
+        Clicking <strong>Enable</strong> will take you to Telegram.
+        Once you are there, just click Start to create the link.
+      </p>
+      <p>
+        Reload this page when you are finished to confirm the process was successful.
+      </p>
+      <div class="buttons">
+        <a *ngIf="!model.enabled" class="btn btn-success"
+           href="https://telegram.me/SteemWatchBot?start={{model.settings.startToken}}"
+          target="_blank"
+        >
+          Enable
+        </a>
+
+        <span class="api-error-wrapper" *ngIf="errorMessage">
+            <span class="api-error">
+              Error: {{errorMessage}}
+            </span>
+          </span>
+          <img *ngIf="processing"
+            src="/assets/img/loading.gif"
+            class="loading-small" />
+      </div>
+    </div>
+  </div>
+<div>

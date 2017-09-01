@@ -23,6 +23,8 @@ type Config struct {
 	GitHubClientId     string `envconfig:"GITHUB_CLIENT_ID"     required:"true"`
 	GitHubClientSecret string `envconfig:"GITHUB_CLIENT_SECRET" required:"true"`
 
+	TelegramBotToken string `envconfig:"TELEGRAM_BOT_TOKEN" required:"true"`
+
 	MongoURL string `envconfig:"MONGO_URL" default:"localhost"`
 
 	SteemdDisabled           bool   `envconfig:"STEEMD_DISABLED"`

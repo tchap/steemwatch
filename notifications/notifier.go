@@ -7,7 +7,9 @@ import (
 	"github.com/tchap/steemwatch/notifications/events"
 	"github.com/tchap/steemwatch/notifications/notifiers/slack"
 	"github.com/tchap/steemwatch/notifications/notifiers/steemitchat"
+	"github.com/tchap/steemwatch/notifications/notifiers/telegram"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -18,6 +20,7 @@ var availableNotifiers = map[string]Notifier{
 // XXX: Ugly. Would be better to pass the values directly somehow.
 func init() {
 	mustGetenv := func(key string) string {
+		// steemit.chat
 		v := os.Getenv(key)
 		if v == "" {
 			panic(key + " is not set")
@@ -29,6 +32,15 @@ func init() {
 	authToken := mustGetenv("STEEMWATCH_STEEMIT_CHAT_AUTH_TOKEN")
 
 	availableNotifiers["steemit-chat"] = steemitchat.NewNotifier(userID, authToken)
+
+	// Telegram
+	botToken := mustGetenv("STEEMWATCH_TELEGRAM_BOT_TOKEN")
+	bot, err := tgbotapi.NewBotAPI(botToken)
+	if err != nil {
+		panic(err)
+	}
+
+	availableNotifiers["telegram"] = telegram.NewNotifier(bot)
 }
 
 type Notifier interface {
