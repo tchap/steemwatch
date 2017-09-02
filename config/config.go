@@ -25,6 +25,8 @@ type Config struct {
 
 	TelegramBotToken string `envconfig:"TELEGRAM_BOT_TOKEN" required:"true"`
 
+	DiscordBotToken string `envconfig:"DISCORD_BOT_TOKEN" required:"true"`
+
 	MongoURL string `envconfig:"MONGO_URL" default:"localhost"`
 
 	SteemdDisabled           bool   `envconfig:"STEEMD_DISABLED"`

@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  branch = "develop"
+  name = "github.com/bwmarrin/discordgo"
+  packages = ["."]
+  revision = "1b5dbef04ede707a410eb19a6e5683d5bdaaa538"
+
+[[projects]]
   name = "github.com/dgrijalva/jwt-go"
   packages = ["."]
   revision = "d2709f9f1f31ebcda9651b03077758c1f3a0018c"
@@ -48,6 +54,18 @@
   name = "github.com/gorilla/securecookie"
   packages = ["."]
   revision = "ff356348f74133a59d3e93aa24b5b4551b6fe90d"
+
+[[projects]]
+  name = "github.com/gorilla/websocket"
+  packages = ["."]
+  revision = "ea4d1f681babbce9545c9c5f3d5194a789c89f5b"
+  version = "v1.2.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/hashicorp/golang-lru"
+  packages = [".","simplelru"]
+  revision = "0a025b7e63adc15a622f29b0b2c4c3848243bbf6"
 
 [[projects]]
   branch = "master"
@@ -153,6 +171,12 @@
 
 [[projects]]
   branch = "master"
+  name = "golang.org/x/crypto"
+  packages = ["nacl/secretbox","poly1305","salsa20/salsa"]
+  revision = "81e90905daefcd6fd217b62423c0908922eadb30"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/net"
   packages = ["context","context/ctxhttp","websocket"]
   revision = "f841c39de738b1d0df95b5a7187744f0e03d8112"
@@ -202,6 +226,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "188744d450313441de19955b811d0f5f7669a7b01e28f88679531b517a7e9a9f"
+  inputs-digest = "276fffd209173938faa7827335629ce44a94073e78da68fb10314e9938e42acd"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -551,8 +551,11 @@ func (processor *BlockProcessor) dispatchEvent(userId string, dispatch func(Noti
 
 		dispatcher, ok := availableNotifiers[id]
 		if !ok {
-			log.Printf("dispatcher not found: id=%v", id)
-			continue
+			dispatcher, ok = processor.additionalNotifiers[id]
+			if !ok {
+				log.Printf("dispatcher not found: id=%v", id)
+				continue
+			}
 		}
 
 		if err := dispatch(dispatcher, notifier.Settings); err != nil {

@@ -16,6 +16,7 @@ import (
 	"github.com/tchap/steemwatch/server/context"
 	"github.com/tchap/steemwatch/server/db"
 	"github.com/tchap/steemwatch/server/routes/api/eventstream"
+	"github.com/tchap/steemwatch/server/routes/api/notifiers/discord"
 	"github.com/tchap/steemwatch/server/routes/api/notifiers/slack"
 	"github.com/tchap/steemwatch/server/routes/api/notifiers/steemitchat"
 	"github.com/tchap/steemwatch/server/routes/api/notifiers/telegram"
@@ -27,6 +28,7 @@ import (
 	"github.com/tchap/steemwatch/server/users/stores/mongodb"
 	"github.com/tchap/steemwatch/server/views"
 
+	"github.com/bwmarrin/discordgo"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine"
@@ -42,10 +44,12 @@ type Context struct {
 
 	listener net.Listener
 
+	discordSession *discordgo.Session
+
 	t tomb.Tomb
 }
 
-func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
+func Run(mongo *mgo.Database, cfg *config.Config) (*Context, *discordgo.Session, error) {
 	serverCtx := &context.Context{}
 
 	// Environment.
@@ -56,7 +60,7 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 		serverCtx.Env = context.EnvironmentProduction
 		serverCtx.SSLEnabled = true
 	default:
-		return nil, errors.New("invalid environment: " + cfg.Env)
+		return nil, nil, errors.New("invalid environment: " + cfg.Env)
 	}
 
 	// Database.
@@ -68,11 +72,11 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 	// Session manager.
 	hashKey, blockKey, err := getSecureCookieKeys(mongo)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	sessionManager, err := sessions.NewSessionManager(hashKey, blockKey, userStore)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	serverCtx.SessionManager = sessionManager
@@ -80,7 +84,7 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 	// Server context.
 	canonicalURL, err := url.Parse(cfg.CanonicalURL)
 	if err != nil {
-		return nil, errors.Wrap(err, "invalid canonical URL")
+		return nil, nil, errors.Wrap(err, "invalid canonical URL")
 	}
 
 	serverCtx.CanonicalURL = canonicalURL
@@ -91,7 +95,7 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 	// Templates.
 	renderer, err := views.NewRenderer("./server/views/*.html")
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	e.SetRenderer(renderer)
 
@@ -168,7 +172,7 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 	// Telegram
 	botSecret := make([]byte, 256/8)
 	if _, err := rand.Read(botSecret); err != nil {
-		return nil, errors.Wrap(err, "failed to generate Telegram bot secret")
+		return nil, nil, errors.Wrap(err, "failed to generate Telegram bot secret")
 	}
 	botSecretHex := hex.EncodeToString(botSecret)
 
@@ -177,12 +181,12 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 
 	bot, err := tgbotapi.NewBotAPI(cfg.TelegramBotToken)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to initialize Telegram bot")
+		return nil, nil, errors.Wrap(err, "failed to initialize Telegram bot")
 	}
 
 	if !strings.Contains(cfg.CanonicalURL, "localhost") {
 		if _, err := bot.SetWebhook(tgbotapi.NewWebhook(botWebhookURL.String())); err != nil {
-			return nil, errors.Wrap(err, "failed to register Telegram webhook URL")
+			return nil, nil, errors.Wrap(err, "failed to register Telegram webhook URL")
 		}
 	}
 
@@ -195,7 +199,7 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 	// Start server
 	listener, err := net.Listen("tcp", cfg.ListenAddress)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to start the web server")
+		return nil, nil, errors.Wrap(err, "failed to start the web server")
 	}
 
 	ctx := &Context{
@@ -203,6 +207,15 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 		listener:           listener,
 	}
 
+	// Discord
+	dg, err := discord.InitBot(&ctx.t, cfg.DiscordBotToken, serverCtx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	discord.BindAPI(serverCtx, api.Group("/notifiers/discord"))
+
+	// Start listening.
 	ctx.t.Go(func() error {
 		e.Run(fasthttp.WithConfig(engine.Config{
 			Listener: listener,
@@ -215,7 +228,7 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, error) {
 		listener.Close()
 	}()
 
-	return ctx, nil
+	return ctx, dg, nil
 }
 
 func (ctx *Context) Interrupt() {

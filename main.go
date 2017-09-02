@@ -9,6 +9,7 @@ import (
 
 	"github.com/tchap/steemwatch/config"
 	"github.com/tchap/steemwatch/notifications"
+	"github.com/tchap/steemwatch/notifications/notifiers/discord"
 	"github.com/tchap/steemwatch/server"
 
 	"github.com/go-steem/rpc"
@@ -48,13 +49,14 @@ func _main() error {
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
 
 	// Start the web server.
-	serverCtx, err := server.Run(wDB, cfg)
+	serverCtx, dg, err := server.Run(wDB, cfg)
 	if err != nil {
 		return err
 	}
 
 	// Start notifications.
 	notificationsCtx, client, err := runNotifications(nDB, cfg,
+		notifications.AddNotifier("discord", discord.NewNotifier(dg)),
 		notifications.AddNotifier("websocket", serverCtx.EventStreamManager))
 	if err != nil {
 		return err

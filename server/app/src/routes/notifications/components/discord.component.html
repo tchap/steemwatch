@@ -1,0 +1,44 @@
+<div>
+  <hr />
+  <h2><img src="/assets/img/Discord-Logo-Black.svg" class="logo"> Discord</h2>
+
+  <div *ngIf="!model">
+    <img src="/assets/img/loading.gif" />
+  </div>
+  <div *ngIf="model">
+    <div *ngIf="model.settings.username || model.settings.lastName">
+      <p>
+        Discord account linked: {{model.settings.username}}
+      </p>
+      <div class="buttons">
+        <button *ngIf="model.enabled" class="btn btn-warning" (click)="setEnabled(false)">
+         Disable
+        </button>
+        <div *ngIf="!model.enabled">
+          <button *ngIf="!model.enabled" class="btn btn-success" (click)="setEnabled(true)">
+            Enable
+          </button>
+          <button class="btn btn-warning" (click)="disconnect()">
+            Disconnect
+          </button>
+        </div>
+
+        <span class="api-error-wrapper" *ngIf="errorMessage">
+            <span class="api-error">
+              Error: {{errorMessage}}
+            </span>
+          </span>
+          <img *ngIf="processing"
+            src="/assets/img/loading.gif"
+            class="loading-small" />
+      </div>
+    </div>
+    <div *ngIf="!model.settings.username">
+      <p>No Discord account linked yet.</p>
+      <p>To link with SteemWatch, you need to talk to @SteemWatchBot on Discord.</p>
+      <p>Please send him the following message: <strong>link {{model.settings.startToken}}</strong></p>
+      <p>Reload this page when you are finished to confirm the process was successful.</p>
+      <p>The bot can do other things, be sure to try sending <strong>help</strong> as well.</p>
+    </div>
+  </div>
+<div>
