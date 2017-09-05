@@ -35,7 +35,10 @@
     </div>
     <div *ngIf="!model.settings.username">
       <p>No Discord account linked yet.</p>
-      <p>To link with SteemWatch, you need to talk to @SteemWatchBot on Discord.</p>
+      <p>
+        To link with SteemWatch, you need to talk to @SteemWatchBot on Discord.
+        In case you need to add the bot to a server, it's associated client ID is 353626156995444736.
+      </p>
       <p>Please send him the following message: <strong>link {{model.settings.startToken}}</strong></p>
       <p>Reload this page when you are finished to confirm the process was successful.</p>
       <p>The bot can do other things, be sure to try sending <strong>help</strong> as well.</p>
