@@ -81,7 +81,7 @@ export class ListComponent implements OnInit, AfterViewChecked {
     this.userInput = this.userInput.replace('@', '');
 
     // Check the value to make sure it is valid.
-    if (!this.userInput.match(/^[a-z][a-z0-9\-]{1,62}[a-z0-9]$/)) {
+    if (!this.userInput.match(/^[a-z][a-z0-9\-.]{1,62}[a-z0-9]$/)) {
       return;
     }
 
