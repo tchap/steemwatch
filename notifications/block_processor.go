@@ -77,7 +77,6 @@ func New(client *rpc.Client, db *mgo.Database, opts ...Option) (*BlockProcessor,
 		{"authors", true},
 		{"voters", true},
 		{"parentAuthors", true},
-		{"selectors.contentID", true},
 	}
 
 	for _, index := range indexes {
@@ -89,6 +88,16 @@ func New(client *rpc.Client, db *mgo.Database, opts ...Option) (*BlockProcessor,
 		})
 		if err != nil {
 			log.Printf("Failed creating index for events.%v: %v", index.Key, err)
+		}
+	}
+
+	for _, key := range []string{"ownerId", "enabled"} {
+		err := db.C("notifiers").EnsureIndex(mgo.Index{
+			Key:        []string{key},
+			Background: true,
+		})
+		if err != nil {
+			log.Printf("Failed creating index for notifiers.%v: %v", key, err)
 		}
 	}
 
