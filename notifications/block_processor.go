@@ -92,6 +92,7 @@ func New(client *rpc.Client, db *mgo.Database, opts ...Option) (*BlockProcessor,
 	}
 
 	for _, key := range []string{"ownerId", "enabled"} {
+		log.Printf("Creating index for notifiers.%v ...", key)
 		err := db.C("notifiers").EnsureIndex(mgo.Index{
 			Key:        []string{key},
 			Background: true,
