@@ -134,7 +134,10 @@ func runNotifications(
 		return nil, nil, errors.Wrapf(
 			err, "failed to connect to steemd using %v", cfg.SteemdRPCEndpointAddress)
 	}
-	client := rpc.NewClient(t)
+	client, err := rpc.NewClient(t)
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "failed to instantiate the steemd RPC client")
+	}
 
 	// Start the block processor.
 	ctx, err := notifications.Run(client, db, opts...)

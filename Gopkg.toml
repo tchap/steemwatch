@@ -25,8 +25,8 @@
   branch = "develop"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/go-steem/rpc"
+  version = "0.8.0"
 
 [[constraint]]
   branch = "master"

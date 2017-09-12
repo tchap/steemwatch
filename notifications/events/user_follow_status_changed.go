@@ -2,10 +2,11 @@ package events
 
 import (
 	"github.com/go-steem/rpc/apis/database"
+	"github.com/go-steem/rpc/types"
 )
 
 type UserFollowStatusChanged struct {
-	Op *database.FollowOperation
+	Op *types.FollowOperation
 }
 
 func (event *UserFollowStatusChanged) Followed() bool {
@@ -27,19 +28,19 @@ func NewUserFollowStatusChangedEventMiner() *UserFollowStatusChangedEventMiner {
 }
 
 func (miner *UserFollowStatusChangedEventMiner) MineEvent(
-	operation *database.Operation,
+	operation types.Operation,
 	content *database.Content, // nil
 ) ([]interface{}, error) {
 
-	op, ok := operation.Body.(*database.CustomJSONOperation)
-	if !ok || op.ID != database.CustomJSONOperationIDFollow {
+	op, ok := operation.Data().(*types.CustomJSONOperation)
+	if !ok || op.Type() != types.TypeFollow {
 		return nil, nil
 	}
 
-	body, err := op.UnmarshalBody()
+	data, err := op.UnmarshalData()
 	if err != nil {
 		return nil, err
 	}
 
-	return []interface{}{&UserFollowStatusChanged{body.(*database.FollowOperation)}}, nil
+	return []interface{}{&UserFollowStatusChanged{data.(*types.FollowOperation)}}, nil
 }

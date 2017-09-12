@@ -2,10 +2,11 @@ package events
 
 import (
 	"github.com/go-steem/rpc/apis/database"
+	"github.com/go-steem/rpc/types"
 )
 
 type AccountWitnessVoted struct {
-	Op *database.AccountWitnessVoteOperation
+	Op *types.AccountWitnessVoteOperation
 }
 
 type AccountWitnessVotedEventMiner struct{}
@@ -15,11 +16,11 @@ func NewAccountWitnessVotedEventMiner() *AccountWitnessVotedEventMiner {
 }
 
 func (miner *AccountWitnessVotedEventMiner) MineEvent(
-	operation *database.Operation,
+	operation types.Operation,
 	content *database.Content, // nil
 ) ([]interface{}, error) {
 
-	op, ok := operation.Body.(*database.AccountWitnessVoteOperation)
+	op, ok := operation.Data().(*types.AccountWitnessVoteOperation)
 	if !ok {
 		return nil, nil
 	}

@@ -2,10 +2,11 @@ package events
 
 import (
 	"github.com/go-steem/rpc/apis/database"
+	"github.com/go-steem/rpc/types"
 )
 
 type CommentPublished struct {
-	Op      *database.CommentOperation
+	Op      *types.CommentOperation
 	Content *database.Content
 }
 
@@ -16,7 +17,7 @@ func NewCommentPublishedEventMiner() *CommentPublishedEventMiner {
 }
 
 func (miner *CommentPublishedEventMiner) MineEvent(
-	operation *database.Operation,
+	operation types.Operation,
 	content *database.Content,
 ) ([]interface{}, error) {
 
@@ -24,7 +25,7 @@ func (miner *CommentPublishedEventMiner) MineEvent(
 		return nil, nil
 	}
 
-	op, ok := operation.Body.(*database.CommentOperation)
+	op, ok := operation.Data().(*types.CommentOperation)
 	if !ok {
 		return nil, nil
 	}

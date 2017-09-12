@@ -2,10 +2,11 @@ package events
 
 import (
 	"github.com/go-steem/rpc/apis/database"
+	"github.com/go-steem/rpc/types"
 )
 
 type AccountUpdated struct {
-	Op *database.AccountUpdateOperation
+	Op *types.AccountUpdateOperation
 }
 
 type AccountUpdatedEventMiner struct{}
@@ -15,11 +16,11 @@ func NewAccountUpdatedEventMiner() *AccountUpdatedEventMiner {
 }
 
 func (miner *AccountUpdatedEventMiner) MineEvent(
-	operation *database.Operation,
+	operation types.Operation,
 	content *database.Content, // nil
 ) ([]interface{}, error) {
 
-	op, ok := operation.Body.(*database.AccountUpdateOperation)
+	op, ok := operation.Data().(*types.AccountUpdateOperation)
 	if !ok {
 		return nil, nil
 	}

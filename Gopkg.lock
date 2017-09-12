@@ -14,10 +14,10 @@
   version = "v3.0.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/go-steem/rpc"
-  packages = [".","apis/database","apis/follow","apis/login","apis/types","interfaces","internal/call","transports/websocket"]
-  revision = "7869f795f418baaa1f06fc37b4449daaf065c717"
+  packages = [".","apis/database","apis/follow","apis/login","apis/networkbroadcast","encoding/transaction","interfaces","internal/call","internal/rpc","transports/websocket","types"]
+  revision = "79c51815a49384da1e6f5d9e557048f156e2f088"
+  version = "v0.8.0"
 
 [[projects]]
   branch = "master"
@@ -226,6 +226,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "276fffd209173938faa7827335629ce44a94073e78da68fb10314e9938e42acd"
+  inputs-digest = "eacc1ae88539c18b5944e966ddfc4402c7dcbf5384aea4171093f5b9ee97d1cb"
   solver-name = "gps-cdcl"
   solver-version = 1

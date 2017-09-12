@@ -132,7 +132,7 @@ func formatStoryPublished(event *events.StoryPublished) *Event {
 
 type StoryVotedPayload struct {
 	Voter              string `json:"voter"`
-	VoteWeight         string `json:"voteWeight"`
+	VoteWeight         int16  `json:"voteWeight"`
 	Author             string `json:"author"`
 	Title              string `json:"title"`
 	URL                string `json:"url"`
@@ -146,7 +146,7 @@ func formatStoryVoted(event *events.StoryVoted) *Event {
 		Kind: "story.voted",
 		Payload: &StoryVotedPayload{
 			Voter:              event.Op.Voter,
-			VoteWeight:         event.Op.Weight.String(),
+			VoteWeight:         int16(event.Op.Weight),
 			Author:             event.Content.Author,
 			Title:              event.Content.Title,
 			URL:                event.Content.URL,
@@ -193,7 +193,7 @@ func formatCommentPublished(event *events.CommentPublished) *Event {
 
 type CommentVotedPayload struct {
 	Voter              string `json:"voter"`
-	VoteWeight         string `json:"voteWeight"`
+	VoteWeight         int16  `json:"voteWeight"`
 	Author             string `json:"author"`
 	Permlink           string `json:"permlink"`
 	URL                string `json:"url"`
@@ -207,7 +207,7 @@ func formatCommentVoted(event *events.CommentVoted) *Event {
 		Kind: "comment.voted",
 		Payload: &CommentVotedPayload{
 			Voter:              event.Op.Voter,
-			VoteWeight:         event.Op.Weight.String(),
+			VoteWeight:         int16(event.Op.Weight),
 			Author:             event.Content.Author,
 			Permlink:           event.Content.Permlink,
 			URL:                event.Content.URL,

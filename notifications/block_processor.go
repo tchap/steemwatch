@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-steem/rpc"
 	"github.com/go-steem/rpc/apis/database"
+	"github.com/go-steem/rpc/types"
 	"github.com/pkg/errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -36,7 +37,7 @@ type BlockProcessor struct {
 	db     *mgo.Database
 	config *BlockProcessorConfig
 
-	eventMiners         map[string][]EventMiner
+	eventMiners         map[types.OpType][]EventMiner
 	additionalNotifiers map[string]Notifier
 
 	blockProcessingLock *sync.Mutex
@@ -108,26 +109,26 @@ func New(client *rpc.Client, db *mgo.Database, opts ...Option) (*BlockProcessor,
 	}
 
 	// Instantiate event miners.
-	eventMiners := map[string][]EventMiner{
-		database.OpTypeAccountUpdate: []EventMiner{
+	eventMiners := map[types.OpType][]EventMiner{
+		types.TypeAccountUpdate: []EventMiner{
 			events.NewAccountUpdatedEventMiner(),
 		},
-		database.OpTypeAccountWitnessVote: []EventMiner{
+		types.TypeAccountWitnessVote: []EventMiner{
 			events.NewAccountWitnessVotedEventMiner(),
 		},
-		database.OpTypeTransfer: []EventMiner{
+		types.TypeTransfer: []EventMiner{
 			events.NewTransferMadeEventMiner(),
 		},
-		database.OpTypeComment: []EventMiner{
+		types.TypeComment: []EventMiner{
 			events.NewUserMentionedEventMiner(),
 			events.NewStoryPublishedEventMiner(),
 			events.NewCommentPublishedEventMiner(),
 		},
-		database.OpTypeVote: []EventMiner{
+		types.TypeVote: []EventMiner{
 			events.NewStoryVotedEventMiner(),
 			events.NewCommentVotedEventMiner(),
 		},
-		database.OpTypeCustomJSON: []EventMiner{
+		types.TypeCustomJSON: []EventMiner{
 			events.NewUserFollowStatusChangedEventMiner(),
 		},
 	}
@@ -171,12 +172,12 @@ func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
 				content *database.Content
 				err     error
 			)
-			switch body := op.Body.(type) {
-			case *database.CommentOperation:
+			switch body := op.Data().(type) {
+			case *types.CommentOperation:
 				content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
 				err = errors.Wrapf(err, "block %v: failed to get content: @%v/%v",
 					block.Number, body.Author, body.Permlink)
-			case *database.VoteOperation:
+			case *types.VoteOperation:
 				content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
 				err = errors.Wrapf(err, "block %v: failed to get content: @%v/%v",
 					block.Number, body.Author, body.Permlink)
@@ -186,7 +187,7 @@ func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
 			}
 
 			// Get miners associated with the given operation.
-			miners, ok := processor.eventMiners[op.Type]
+			miners, ok := processor.eventMiners[op.Type()]
 			if !ok {
 				continue
 			}

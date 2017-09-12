@@ -2,10 +2,11 @@ package events
 
 import (
 	"github.com/go-steem/rpc/apis/database"
+	"github.com/go-steem/rpc/types"
 )
 
 type TransferMade struct {
-	Op *database.TransferOperation
+	Op *types.TransferOperation
 }
 
 type TransferMadeEventMiner struct{}
@@ -15,11 +16,11 @@ func NewTransferMadeEventMiner() *TransferMadeEventMiner {
 }
 
 func (miner *TransferMadeEventMiner) MineEvent(
-	operation *database.Operation,
+	operation types.Operation,
 	content *database.Content, // nil
 ) ([]interface{}, error) {
 
-	op, ok := operation.Body.(*database.TransferOperation)
+	op, ok := operation.Data().(*types.TransferOperation)
 	if !ok {
 		return nil, nil
 	}
