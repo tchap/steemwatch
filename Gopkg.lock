@@ -50,10 +50,22 @@
   revision = "53e6ce116135b80d037921a7fdd5138cf32d7a8a"
 
 [[projects]]
+  name = "github.com/gorilla/context"
+  packages = ["."]
+  revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
+  version = "v1.1"
+
+[[projects]]
   branch = "master"
   name = "github.com/gorilla/securecookie"
   packages = ["."]
   revision = "ff356348f74133a59d3e93aa24b5b4551b6fe90d"
+
+[[projects]]
+  name = "github.com/gorilla/sessions"
+  packages = ["."]
+  revision = "ca9ada44574153444b00d3fd9c8559e4cc95f896"
+  version = "v1.1"
 
 [[projects]]
   name = "github.com/gorilla/websocket"
@@ -106,14 +118,20 @@
 [[projects]]
   branch = "master"
   name = "github.com/labstack/echo"
-  packages = [".","engine","engine/fasthttp","log","middleware"]
-  revision = "451b2ccc9ffda7fd7fad2027b75d93b18ff87cbe"
+  packages = [".","middleware"]
+  revision = "1678da53d65d33464d578ace3d2854b30dfd8e4f"
 
 [[projects]]
   branch = "master"
+  name = "github.com/labstack/echo-contrib"
+  packages = ["session"]
+  revision = "c43bc4a1577d32bc1c485cb435aedf3e19d1bf14"
+
+[[projects]]
   name = "github.com/labstack/gommon"
-  packages = ["bytes","color","log"]
-  revision = "722aa12d41c236ce78ff48eac1cafe0107ecdc9d"
+  packages = ["bytes","color","log","random"]
+  revision = "779b8a8b9850a97acba6a3fe20feb628c39e17c1"
+  version = "0.2.2"
 
 [[projects]]
   branch = "master"
@@ -140,18 +158,6 @@
   revision = "a0d878d054d52a1b763fa0ae61c2d854099b71c2"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/tchap/securecookie"
-  packages = ["."]
-  revision = "a62e5b91d1500e97ec219f3ba10039d2aa040743"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/tchap/websocket"
-  packages = ["."]
-  revision = "efccbc339158bd22a3c5ec9781345e713ec25e51"
-
-[[projects]]
   name = "github.com/technoweenie/multipartstreamer"
   packages = ["."]
   revision = "a90a01d73ae432e2611d178c18367fbaa13e0154"
@@ -172,7 +178,7 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = ["nacl/secretbox","poly1305","salsa20/salsa"]
+  packages = ["acme","acme/autocert","nacl/secretbox","poly1305","salsa20/salsa"]
   revision = "81e90905daefcd6fd217b62423c0908922eadb30"
 
 [[projects]]
@@ -226,6 +232,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "eacc1ae88539c18b5944e966ddfc4402c7dcbf5384aea4171093f5b9ee97d1cb"
+  inputs-digest = "e64d5b4462b9763866801e8a9e90392eac43b62edfa9848981d5dbd1ed5d5dbf"
   solver-name = "gps-cdcl"
   solver-version = 1

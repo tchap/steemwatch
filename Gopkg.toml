@@ -37,6 +37,10 @@
   name = "github.com/gorilla/securecookie"
 
 [[constraint]]
+  name = "github.com/gorilla/sessions"
+  version = "1.1"
+
+[[constraint]]
   name = "github.com/go-telegram-bot-api/telegram-bot-api"
   version = "4.6.0"
 
@@ -59,10 +63,6 @@
 [[constraint]]
   branch = "master"
   name = "github.com/steemwatch/blockfetcher"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/tchap/securecookie"
 
 [[constraint]]
   branch = "master"
