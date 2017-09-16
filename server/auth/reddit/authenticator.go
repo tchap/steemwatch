@@ -53,11 +53,12 @@ func (authenticator *Authenticator) Authenticate(ctx echo.Context) error {
 	}
 
 	// Store the state in the state cookie.
-	cookie := &echo.Cookie{}
-	cookie.SetName(StateCookieName)
-	cookie.SetValue(state)
-	cookie.SetHTTPOnly(true)
-	cookie.SetSecure(authenticator.forceSSL)
+	cookie := &http.Cookie{
+		Name:     StateCookieName,
+		Value:    state,
+		Secure:   authenticator.forceSSL,
+		HttpOnly: true,
+	}
 
 	ctx.SetCookie(cookie)
 
@@ -81,18 +82,19 @@ func (authenticator *Authenticator) Callback(ctx echo.Context) (*auth.UserProfil
 	}
 
 	// Clear the cookie.
-	cookie := &echo.Cookie{}
-	cookie.SetName(StateCookieName)
-	cookie.SetValue("unset")
-	cookie.SetHTTPOnly(true)
-	cookie.SetSecure(authenticator.forceSSL)
-	cookie.SetExpires(time.Now().Add(-24 * time.Hour))
+	cookie := &http.Cookie{
+		Name:     StateCookieName,
+		Value:    "unset",
+		Expires:  time.Now().Add(-24 * time.Hour),
+		Secure:   authenticator.forceSSL,
+		HttpOnly: true,
+	}
 
 	ctx.SetCookie(cookie)
 
 	// Make sure the query param matches the state cookie.
 	state := ctx.QueryParam("state")
-	if v := stateCookie.Value(); v != state {
+	if v := stateCookie.Value; v != state {
 		return nil, errors.Errorf("reddit: state mismatch: %v != %v", v, state)
 	}
 

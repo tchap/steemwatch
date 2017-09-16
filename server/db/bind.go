@@ -46,12 +46,12 @@ func BindList(serverCtx *context.Context, group *echo.Group) {
 
 		// Send the chosen list as a response.
 		ctx.Response().Header().Set(echo.HeaderContentType, "application/json")
-		return json.NewEncoder(ctx.Response().Writer()).Encode(list)
+		return json.NewEncoder(ctx.Response().Writer).Encode(list)
 	})
 
 	group.POST("/", func(ctx echo.Context) error {
 		// Read the request body.
-		body, err := ioutil.ReadAll(ctx.Request().Body())
+		body, err := ioutil.ReadAll(ctx.Request().Body)
 		if err != nil {
 			return err
 		}

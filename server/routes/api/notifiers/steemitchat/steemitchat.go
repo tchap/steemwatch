@@ -73,7 +73,7 @@ func Bind(serverCtx *context.Context, root *echo.Group) {
 			}
 		}
 
-		err = json.NewEncoder(ctx.Response().Writer()).Encode(&doc)
+		err = json.NewEncoder(ctx.Response().Writer).Encode(&doc)
 		return errors.Wrapf(err, "failed to encode doc [doc=%+v]", doc)
 	})
 
@@ -82,7 +82,7 @@ func Bind(serverCtx *context.Context, root *echo.Group) {
 
 		// Prepare the document to be inserted.
 		var doc Document
-		if err := json.NewDecoder(ctx.Request().Body()).Decode(&doc); err != nil {
+		if err := json.NewDecoder(ctx.Request().Body).Decode(&doc); err != nil {
 			return errors.Wrap(err, "failed to decode request body")
 		}
 		doc.OwnerId = bson.ObjectIdHex(profile.Id)
@@ -113,7 +113,7 @@ func Bind(serverCtx *context.Context, root *echo.Group) {
 
 		// Unmarshal the update.
 		var doc Document
-		if err := json.NewDecoder(ctx.Request().Body()).Decode(&doc); err != nil {
+		if err := json.NewDecoder(ctx.Request().Body).Decode(&doc); err != nil {
 			return errors.Wrap(err, "failed to decode request body")
 		}
 

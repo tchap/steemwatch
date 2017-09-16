@@ -63,7 +63,7 @@ You will be receiving SteemWatch notifications in this channel.`
 
 	root.POST("/", func(ctx echo.Context) error {
 		var update tgbotapi.Update
-		if err := json.NewDecoder(ctx.Request().Body()).Decode(&update); err != nil {
+		if err := json.NewDecoder(ctx.Request().Body).Decode(&update); err != nil {
 			return errors.Wrap(err, "failed to decode request body")
 		}
 
@@ -166,7 +166,7 @@ func BindAPI(serverCtx *context.Context, root *echo.Group) {
 			}
 		}
 
-		err = json.NewEncoder(ctx.Response().Writer()).Encode(&doc)
+		err = json.NewEncoder(ctx.Response().Writer).Encode(&doc)
 		return errors.Wrapf(err, "failed to encode doc [doc=%+v]", doc)
 	})
 
@@ -174,7 +174,7 @@ func BindAPI(serverCtx *context.Context, root *echo.Group) {
 		profile := ctx.Get("user").(*users.User)
 
 		var doc Document
-		if err := json.NewDecoder(ctx.Request().Body()).Decode(&doc); err != nil {
+		if err := json.NewDecoder(ctx.Request().Body).Decode(&doc); err != nil {
 			return errors.Wrap(err, "failed to decode request body")
 		}
 		if doc.Enabled == nil {
