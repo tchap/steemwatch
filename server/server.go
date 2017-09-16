@@ -4,6 +4,8 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"net"
+	"net/http"
+	"net/http/pprof"
 	"net/url"
 	"strings"
 
@@ -30,9 +32,9 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	gorillaSessions "github.com/gorilla/sessions"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine"
-	"github.com/labstack/echo/engine/fasthttp"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/middleware"
 	"github.com/pkg/errors"
 	"gopkg.in/mgo.v2"
@@ -74,7 +76,7 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, *discordgo.Session,
 	if err != nil {
 		return nil, nil, err
 	}
-	sessionManager, err := sessions.NewSessionManager(hashKey, blockKey, userStore)
+	sessionManager, err := sessions.NewSessionManager(userStore)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -97,7 +99,7 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, *discordgo.Session,
 	if err != nil {
 		return nil, nil, err
 	}
-	e.SetRenderer(renderer)
+	e.Renderer = renderer
 
 	// Assets.
 	e.Static("/app", "server/app")
@@ -113,8 +115,36 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, *discordgo.Session,
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
+	e.Use(session.Middleware(gorillaSessions.NewCookieStore(hashKey, blockKey)))
 
-	csrf := middleware.CSRF([]byte("secret"))
+	// A temporary fix. We need to encode the CSRF header value.
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			req := c.Request()
+			token := req.Header.Get(echo.HeaderXCSRFToken)
+			req.Header.Set(echo.HeaderXCSRFToken, url.QueryEscape(token))
+			return next(c)
+		}
+	})
+
+	csrfConfig := middleware.DefaultCSRFConfig
+	csrfConfig.CookieName = "csrf"
+	csrfConfig.CookiePath = "/"
+	csrf := middleware.CSRFWithConfig(csrfConfig)
+
+	// Debug
+	e.GET("/debug/pprof/cmdline", echo.WrapHandler(http.HandlerFunc(pprof.Cmdline)))
+	e.GET("/debug/pprof/profile", echo.WrapHandler(http.HandlerFunc(pprof.Profile)))
+	e.GET("/debug/pprof/symbol", echo.WrapHandler(http.HandlerFunc(pprof.Symbol)))
+	e.GET("/debug/pprof/trace", echo.WrapHandler(http.HandlerFunc(pprof.Trace)))
+	e.GET(
+		"/debug/pprof",
+		echo.WrapHandler(http.HandlerFunc(pprof.Index)),
+		middleware.AddTrailingSlashWithConfig(middleware.TrailingSlashConfig{
+			RedirectCode: http.StatusPermanentRedirect,
+		}),
+	)
+	e.GET("/debug/pprof/*", echo.WrapHandler(http.HandlerFunc(pprof.Index)))
 
 	// Web
 	homeHandler := home.NewHandlerFunc(serverCtx)
@@ -217,9 +247,7 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, *discordgo.Session,
 
 	// Start listening.
 	ctx.t.Go(func() error {
-		e.Run(fasthttp.WithConfig(engine.Config{
-			Listener: listener,
-		}))
+		http.Serve(listener, e)
 		return nil
 	})
 
