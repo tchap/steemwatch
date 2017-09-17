@@ -32,6 +32,6 @@ func Bind(serverCtx *context.Context, root *echo.Group) {
 
 		resp := ctx.Response()
 		resp.Header().Set("Content-Type", "application/json")
-		return json.NewEncoder(resp.Writer()).Encode(&info)
+		return json.NewEncoder(resp.Writer).Encode(&info)
 	})
 }

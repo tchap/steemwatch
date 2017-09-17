@@ -52,9 +52,10 @@ func (authenticator *Authenticator) Callback(ctx echo.Context) (*auth.UserProfil
 	// Collect data from the GitHub API.
 	errCh := make(chan error, 2)
 
+	reqCtx := ctx.Request().Context()
 	var me *github.User
 	go func() {
-		user, _, err := client.Users.Get("")
+		user, _, err := client.Users.Get(reqCtx, "")
 		if err != nil {
 			errCh <- err
 			return
@@ -63,9 +64,9 @@ func (authenticator *Authenticator) Callback(ctx echo.Context) (*auth.UserProfil
 		errCh <- nil
 	}()
 
-	var emails []github.UserEmail
+	var emails []*github.UserEmail
 	go func() {
-		userEmails, _, err := client.Users.ListEmails(nil)
+		userEmails, _, err := client.Users.ListEmails(reqCtx, nil)
 		if err != nil {
 			errCh <- err
 		}

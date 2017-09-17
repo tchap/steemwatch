@@ -1,39 +1,23 @@
 package sessions
 
 import (
-	"strings"
-
 	"github.com/tchap/steemwatch/server/users"
 
+	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
-	"github.com/pkg/errors"
-	"github.com/tchap/securecookie"
+	"github.com/labstack/echo-contrib/session"
 )
 
-const SessionCookieName = "SID"
+const SessionName = "session"
 
 type SessionManager struct {
-	cookie *securecookie.SecureCookie
 	store  users.Store
 	secure bool
 }
 
-func NewSessionManager(hashKey, blockKey []byte, store users.Store) (*SessionManager, error) {
-	// Make sure the keys are of correct length.
-	switch {
-	case len(hashKey) != 64:
-		return nil, errors.New("the hash key must be 64 bytes long")
-	case len(blockKey) != 32:
-		return nil, errors.New("the block key must be 32 bytes long")
-	}
-
-	// Create a SecureCookie.
-	cookie := securecookie.New(hashKey, blockKey)
-
-	// Return a new SessionManager.
+func NewSessionManager(store users.Store) (*SessionManager, error) {
 	return &SessionManager{
-		cookie: cookie,
-		store:  store,
+		store: store,
 	}, nil
 }
 
@@ -42,72 +26,59 @@ func (manager *SessionManager) SecureCookie(secure bool) {
 }
 
 func (manager *SessionManager) GetProfile(ctx echo.Context) (*users.User, error) {
-	// Get the session cookie value.
-	cookie, err := ctx.Cookie(SessionCookieName)
+	// Get the session.
+	s, err := session.Get(SessionName, ctx)
 	if err != nil {
-		if err == echo.ErrCookieNotFound {
-			return nil, nil
-		} else {
-			return nil, err
-		}
+		return nil, err
 	}
-	// Empty value is the same as no value at all.
-	cookieValue := cookie.Value()
-	if cookieValue == "" {
-		return nil, nil
-	}
-	// Replace '0' with '='.
-	cookieValue = strings.Replace(cookieValue, "0", "=", -1)
 
-	// Decode the cookie value.
-	var session string
-	if err := manager.cookie.Decode(SessionCookieName, cookieValue, &session); err != nil {
-		if ex, ok := err.(securecookie.Error); ok && ex.IsDecode() {
-			manager.ClearProfile(ctx)
-			return nil, nil
-		} else {
-			return nil, err
-		}
+	// Make sure this is not a new session.
+	if s.IsNew {
+		return nil, nil
 	}
 
 	// Load the user profile.
-	return manager.store.LoadUser(session)
+	return manager.store.LoadUser(s.Values["id"].(string))
 }
 
 func (manager *SessionManager) SetProfile(ctx echo.Context, profile *users.User) error {
 	// Store the profile.
-	session, err := manager.store.StoreUser(profile)
+	id, err := manager.store.StoreUser(profile)
 	if err != nil {
 		return err
 	}
 
-	// Encode the profile to get the cookie value.
-	cookieValue, err := manager.cookie.Encode(SessionCookieName, session)
+	// Get a sessions.
+	s, err := session.Get(SessionName, ctx)
 	if err != nil {
 		return err
 	}
-	// Replace '=' with '0'.
-	cookieValue = strings.Replace(cookieValue, "=", "0", -1)
+	s.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   7 * 24 * 60 * 60,
+		HttpOnly: true,
+		Secure:   manager.secure,
+	}
 
-	// Assemble the cookie object.
-	cookie := &echo.Cookie{}
-	cookie.SetName(SessionCookieName)
-	cookie.SetValue(cookieValue)
-	cookie.SetHTTPOnly(true)
-	cookie.SetSecure(manager.secure)
-
-	// And finally, set the cookie.
-	ctx.SetCookie(cookie)
-	return nil
+	// Update and save the session.
+	s.Values["id"] = id
+	return s.Save(ctx.Request(), ctx.Response())
 }
 
 func (manager *SessionManager) ClearProfile(ctx echo.Context) error {
-	// Assemble the cookie object so that the value is empty and expires is in the past.
-	cookie := &echo.Cookie{}
-	cookie.SetName(SessionCookieName)
-	cookie.SetValue("")
+	s, err := session.Get(SessionName, ctx)
+	if err != nil {
+		return err
+	}
+	if s.IsNew {
+		return nil
+	}
 
-	// Set the cookie.
-	ctx.SetCookie(cookie)
-	return nil
+	s.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   manager.secure,
+	}
+	return s.Save(ctx.Request(), ctx.Response())
 }

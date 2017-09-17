@@ -9,12 +9,16 @@ import (
 	"github.com/tchap/steemwatch/server/context"
 	"github.com/tchap/steemwatch/server/users"
 
+	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/fasthttp"
 	"github.com/pkg/errors"
-	"github.com/tchap/websocket"
 	"gopkg.in/mgo.v2/bson"
 )
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
 
 type connectionRecord struct {
 	conn *websocket.Conn
@@ -38,9 +42,12 @@ func (manager *Manager) Bind(serverCtx *context.Context, group *echo.Group) {
 	group.GET("/ws/", func(ctx echo.Context) error {
 		user := ctx.Get("user").(*users.User)
 
-		var upgrader websocket.FastHTTPUpgrader
+		conn, err := upgrader.Upgrade(ctx.Response().Writer, ctx.Request(), nil)
+		if err != nil {
+			return err
+		}
 
-		upgrader.Handler = func(conn *websocket.Conn) {
+		go func(userID string, conn *websocket.Conn) {
 			defer conn.Close()
 			manager.lock.Lock()
 
@@ -51,13 +58,13 @@ func (manager *Manager) Bind(serverCtx *context.Context, group *echo.Group) {
 
 			// Close any existing connection for the user.
 			// This is perhaps not idea, but it at least prevents leaking connections.
-			record, ok := manager.connections[user.Id]
+			record, ok := manager.connections[userID]
 			if ok {
 				record.conn.Close()
 			}
 
 			// Insert the new connection record into the map.
-			manager.connections[user.Id] = &connectionRecord{conn, &sync.Mutex{}}
+			manager.connections[userID] = &connectionRecord{conn, &sync.Mutex{}}
 			log.Println(
 				"WebSocket connection added. Number of connections:", len(manager.connections))
 			manager.lock.Unlock()
@@ -66,7 +73,7 @@ func (manager *Manager) Bind(serverCtx *context.Context, group *echo.Group) {
 				_, _, err := conn.ReadMessage()
 				if err != nil {
 					manager.lock.Lock()
-					delete(manager.connections, user.Id)
+					delete(manager.connections, userID)
 					log.Println(
 						"WebSocket connection removed. Number of connections:",
 						len(manager.connections))
@@ -74,9 +81,9 @@ func (manager *Manager) Bind(serverCtx *context.Context, group *echo.Group) {
 					return
 				}
 			}
-		}
+		}(user.Id, conn)
 
-		return fasthttp.WrapHandler(upgrader.UpgradeHandler)(ctx)
+		return nil
 	})
 }
 

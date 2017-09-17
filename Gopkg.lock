@@ -2,10 +2,16 @@
 
 
 [[projects]]
+  name = "cloud.google.com/go"
+  packages = ["compute/metadata"]
+  revision = "5a9e19d4e1e41a734154e44a2132b358afb49a03"
+  version = "v0.13.0"
+
+[[projects]]
   branch = "develop"
   name = "github.com/bwmarrin/discordgo"
   packages = ["."]
-  revision = "1b5dbef04ede707a410eb19a6e5683d5bdaaa538"
+  revision = "c4a08de52513a9057d4ebf127a23ba8f4160f8d8"
 
 [[projects]]
   name = "github.com/dgrijalva/jwt-go"
@@ -35,13 +41,13 @@
   branch = "master"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
-  revision = "ab9f9a6dab164b7d1246e0e688b0ab7b94d8553e"
+  revision = "11b8df160996e00fd4b55cbaafb3d84ec6d50fa8"
 
 [[projects]]
   branch = "master"
   name = "github.com/google/go-github"
   packages = ["github"]
-  revision = "0af232a73d5e33ea92bd7f6d3efab510c4780856"
+  revision = "12126fbfe000a09047ebdeb2b5160be3af88ab9e"
 
 [[projects]]
   branch = "master"
@@ -50,10 +56,22 @@
   revision = "53e6ce116135b80d037921a7fdd5138cf32d7a8a"
 
 [[projects]]
+  name = "github.com/gorilla/context"
+  packages = ["."]
+  revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
+  version = "v1.1"
+
+[[projects]]
   branch = "master"
   name = "github.com/gorilla/securecookie"
   packages = ["."]
-  revision = "ff356348f74133a59d3e93aa24b5b4551b6fe90d"
+  revision = "e59506cc896acb7f7bf732d4fdf5e25f7ccd8983"
+
+[[projects]]
+  name = "github.com/gorilla/sessions"
+  packages = ["."]
+  revision = "ca9ada44574153444b00d3fd9c8559e4cc95f896"
+  version = "v1.1"
 
 [[projects]]
   name = "github.com/gorilla/websocket"
@@ -71,25 +89,25 @@
   branch = "master"
   name = "github.com/kelseyhightower/envconfig"
   packages = ["."]
-  revision = "91921eb4cf999321cdbeebdba5a03555800d493b"
+  revision = "bc1350181c239ebcef7a398f576160021f5dfed6"
 
 [[projects]]
-  branch = "master"
   name = "github.com/klauspost/compress"
   packages = ["flate","gzip","zlib"]
-  revision = "14eb9c4951195779ecfbec34431a976de7335b0a"
+  revision = "6c8db69c4b49dd4df1fff66996cf556176d0b9bf"
+  version = "v1.2.1"
 
 [[projects]]
-  branch = "master"
   name = "github.com/klauspost/cpuid"
   packages = ["."]
-  revision = "09cded8978dc9e80714c4d85b0322337b0a1e5e0"
+  revision = "ae7887de9fa5d2db4eaa8174a7eff2c1ac00f2da"
+  version = "v1.1"
 
 [[projects]]
-  branch = "master"
   name = "github.com/klauspost/crc32"
   packages = ["."]
-  revision = "19b0b332c9e4516a6370a0456e6182c3b5036720"
+  revision = "cb6bfca970f6908083f26f39a79009d608efd5cd"
+  version = "v1.1"
 
 [[projects]]
   branch = "master"
@@ -106,50 +124,44 @@
 [[projects]]
   branch = "master"
   name = "github.com/labstack/echo"
-  packages = [".","engine","engine/fasthttp","log","middleware"]
-  revision = "451b2ccc9ffda7fd7fad2027b75d93b18ff87cbe"
+  packages = [".","middleware"]
+  revision = "1678da53d65d33464d578ace3d2854b30dfd8e4f"
 
 [[projects]]
   branch = "master"
+  name = "github.com/labstack/echo-contrib"
+  packages = ["session"]
+  revision = "c43bc4a1577d32bc1c485cb435aedf3e19d1bf14"
+
+[[projects]]
   name = "github.com/labstack/gommon"
-  packages = ["bytes","color","log"]
-  revision = "722aa12d41c236ce78ff48eac1cafe0107ecdc9d"
+  packages = ["bytes","color","log","random"]
+  revision = "779b8a8b9850a97acba6a3fe20feb628c39e17c1"
+  version = "0.2.2"
 
 [[projects]]
-  branch = "master"
   name = "github.com/mattn/go-colorable"
   packages = ["."]
-  revision = "9056b7a9f2d1f2d96498d6d146acd1f9d5ed3d59"
+  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
+  version = "v0.0.9"
 
 [[projects]]
-  branch = "master"
   name = "github.com/mattn/go-isatty"
   packages = ["."]
-  revision = "56b76bdf51f7708750eac80fa38b952bb9f32639"
+  revision = "fc9e8d8ef48496124e79ae0df75490096eccf6fe"
+  version = "v0.0.2"
 
 [[projects]]
   branch = "master"
   name = "github.com/pkg/errors"
   packages = ["."]
-  revision = "17b591df37844cde689f4d5813e5cea0927d8dd2"
+  revision = "2b3a18b5f0fb6b4f9190549597d3f962c02bc5eb"
 
 [[projects]]
   branch = "master"
   name = "github.com/steemwatch/blockfetcher"
   packages = ["."]
   revision = "a0d878d054d52a1b763fa0ae61c2d854099b71c2"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/tchap/securecookie"
-  packages = ["."]
-  revision = "a62e5b91d1500e97ec219f3ba10039d2aa040743"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/tchap/websocket"
-  packages = ["."]
-  revision = "efccbc339158bd22a3c5ec9781345e713ec25e51"
 
 [[projects]]
   name = "github.com/technoweenie/multipartstreamer"
@@ -159,45 +171,51 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/valyala/bytebufferpool"
+  packages = ["."]
+  revision = "e746df99fe4a3986f4d4f79e13c1e0117ce9c2f7"
+
+[[projects]]
+  branch = "master"
   name = "github.com/valyala/fasthttp"
-  packages = [".","fasthttputil"]
-  revision = "8db7d05839b5f4d21d5da1fcb3897d294ff6fd9f"
+  packages = [".","fasthttputil","stackless"]
+  revision = "5116aa64e038d917b3916a74da456c00643ff1e6"
 
 [[projects]]
   branch = "master"
   name = "github.com/valyala/fasttemplate"
   packages = ["."]
-  revision = "3b874956e03f1636d171bda64b130f9135f42cff"
+  revision = "dcecefd839c4193db0d35b88ec65b4c12d360ab0"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = ["nacl/secretbox","poly1305","salsa20/salsa"]
-  revision = "81e90905daefcd6fd217b62423c0908922eadb30"
+  packages = ["acme","acme/autocert","nacl/secretbox","poly1305","salsa20/salsa"]
+  revision = "7d9177d70076375b9a59c8fde23d52d9c4a7ecd5"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context","context/ctxhttp","websocket"]
-  revision = "f841c39de738b1d0df95b5a7187744f0e03d8112"
+  revision = "8351a756f30f1297fe94bbf4b767ec589c6ea6d0"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/oauth2"
   packages = [".","facebook","github","google","internal","jws","jwt"]
-  revision = "65a8d08c6292395d47053be10b3c5e91960def76"
+  revision = "13449ad91cb26cb47661c1b080790392170385fd"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "bb24a47a89eac6c1227fbcb2ae37a8b9ed323366"
+  revision = "062cd7e4e68206d8bab9b18396626e855c992658"
 
 [[projects]]
   branch = "master"
   name = "google.golang.org/api"
   packages = ["gensupport","googleapi","googleapi/internal/uritemplates","plus/v1"]
-  revision = "63ade871fd3aec1225809d496e81ec91ab76ea29"
+  revision = "9133bb5dadbe27a041421f5d87b9f4b807a8548c"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -206,26 +224,20 @@
   version = "v1.0.0"
 
 [[projects]]
-  name = "google.golang.org/cloud"
-  packages = ["compute/metadata"]
-  revision = "0f0b8420cb699ac4ce059c63bac263f4301fe95b"
-  version = "v0.12.0"
-
-[[projects]]
   branch = "v2"
   name = "gopkg.in/mgo.v2"
-  packages = [".","bson","internal/sasl","internal/scram"]
-  revision = "29cc868a5ca65f401ff318143f9408d02f4799cc"
+  packages = [".","bson","internal/json","internal/sasl","internal/scram"]
+  revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
 
 [[projects]]
   branch = "v2"
   name = "gopkg.in/tomb.v2"
   packages = ["."]
-  revision = "14b3d72120e8d10ea6e6b7f87f7175734b1faab8"
+  revision = "d5d1b5820637886def9eef33e03a27a9f166942c"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "eacc1ae88539c18b5944e966ddfc4402c7dcbf5384aea4171093f5b9ee97d1cb"
+  inputs-digest = "e64d5b4462b9763866801e8a9e90392eac43b62edfa9848981d5dbd1ed5d5dbf"
   solver-name = "gps-cdcl"
   solver-version = 1
