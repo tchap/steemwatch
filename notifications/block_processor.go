@@ -284,7 +284,7 @@ func (processor *BlockProcessor) configFlusher() error {
 
 	updateConfig := func(block *database.Block) {
 		// In case this is not the next block, remember it and return.
-		if block.Number != config.NextBlockNum {
+		if block.Number+1 != config.NextBlockNum {
 			pendingBlocks[block.Number] = block
 			return
 		}
