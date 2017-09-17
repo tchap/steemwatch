@@ -279,13 +279,13 @@ func (processor *BlockProcessor) Finalize() error {
 func (processor *BlockProcessor) configFlusher() error {
 	config := processor.config.Clone()
 
-	pendingBlocks := map[uint32]*database.Block{}
+	processedBlocks := map[uint32]*database.Block{}
 	numAlive := processor.numWorkers
 
 	updateConfig := func(block *database.Block) {
 		// In case this is not the next block, remember it and return.
 		if block.Number+1 != config.NextBlockNum {
-			pendingBlocks[block.Number] = block
+			processedBlocks[block.Number] = block
 			return
 		}
 
@@ -295,13 +295,14 @@ func (processor *BlockProcessor) configFlusher() error {
 
 		// Process any directly following blocks in the queue.
 		for {
-			next, ok := pendingBlocks[config.NextBlockNum]
+			b, ok := processedBlocks[config.NextBlockNum]
 			if !ok {
 				return
 			}
-			config.NextBlockNum = next.Number + 1
-			config.LastBlockTimestamp = next.Timestamp.Time
-			delete(pendingBlocks, config.NextBlockNum)
+			delete(processedBlocks, config.NextBlockNum)
+
+			config.NextBlockNum = b.Number + 1
+			config.LastBlockTimestamp = b.Timestamp.Time
 		}
 	}
 
