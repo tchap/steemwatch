@@ -133,18 +133,16 @@ func Run(mongo *mgo.Database, cfg *config.Config) (*Context, *discordgo.Session,
 	csrf := middleware.CSRFWithConfig(csrfConfig)
 
 	// Debug
-	e.GET("/debug/pprof/cmdline", echo.WrapHandler(http.HandlerFunc(pprof.Cmdline)))
-	e.GET("/debug/pprof/profile", echo.WrapHandler(http.HandlerFunc(pprof.Profile)))
-	e.GET("/debug/pprof/symbol", echo.WrapHandler(http.HandlerFunc(pprof.Symbol)))
-	e.GET("/debug/pprof/trace", echo.WrapHandler(http.HandlerFunc(pprof.Trace)))
+	e.GET("/debug/pprof/cmdline/", echo.WrapHandler(http.HandlerFunc(pprof.Cmdline)))
+	e.GET("/debug/pprof/profile/", echo.WrapHandler(http.HandlerFunc(pprof.Profile)))
+	e.GET("/debug/pprof/symbol/", echo.WrapHandler(http.HandlerFunc(pprof.Symbol)))
+	e.GET("/debug/pprof/trace/", echo.WrapHandler(http.HandlerFunc(pprof.Trace)))
+	e.GET("/debug/pprof/", echo.WrapHandler(http.HandlerFunc(pprof.Index)))
 	e.GET(
-		"/debug/pprof",
+		"/debug/pprof/*",
 		echo.WrapHandler(http.HandlerFunc(pprof.Index)),
-		middleware.AddTrailingSlashWithConfig(middleware.TrailingSlashConfig{
-			RedirectCode: http.StatusPermanentRedirect,
-		}),
+		middleware.RemoveTrailingSlash(),
 	)
-	e.GET("/debug/pprof/*", echo.WrapHandler(http.HandlerFunc(pprof.Index)))
 
 	// Web
 	homeHandler := home.NewHandlerFunc(serverCtx)
