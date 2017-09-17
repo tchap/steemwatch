@@ -62,9 +62,7 @@ func _main() error {
 	if err != nil {
 		return err
 	}
-	if client != nil {
-		defer client.Close()
-	}
+	defer client.Close()
 
 	// Start processing signals.
 	go func() {
@@ -126,22 +124,29 @@ func runNotifications(
 		}
 	}()
 
-	// Connect to steemd.
-	t, err := websocket.NewTransport(cfg.SteemdRPCEndpointAddress,
-		websocket.SetAutoReconnectEnabled(true),
-		websocket.SetAutoReconnectMaxDelay(1*time.Minute),
-		websocket.SetMonitor(monitorChan))
-	if err != nil {
-		return nil, nil, errors.Wrapf(
-			err, "failed to connect to steemd using %v", cfg.SteemdRPCEndpointAddress)
-	}
-	client, err := rpc.NewClient(t)
-	if err != nil {
-		return nil, nil, errors.Wrapf(err, "failed to instantiate the steemd RPC client")
+	connect := func() (*rpc.Client, error) {
+		// Connect to steemd.
+		t, err := websocket.NewTransport(cfg.SteemdRPCEndpointAddress,
+			websocket.SetAutoReconnectEnabled(true),
+			websocket.SetAutoReconnectMaxDelay(1*time.Minute),
+			websocket.SetMonitor(monitorChan))
+		if err != nil {
+			return nil, errors.Wrapf(
+				err, "failed to connect to steemd using %v", cfg.SteemdRPCEndpointAddress)
+		}
+		client, err := rpc.NewClient(t)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to instantiate the steemd RPC client")
+		}
+		return client, nil
 	}
 
 	// Start the block processor.
-	ctx, err := notifications.Run(client, db, opts...)
+	client, err := connect()
+	if err != nil {
+		return nil, nil, err
+	}
+	ctx, err := notifications.Run(client, connect, db, opts...)
 	if err != nil {
 		client.Close()
 		return nil, nil, err

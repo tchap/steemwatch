@@ -70,7 +70,12 @@ func SetWorkerCount(numWorkers uint) Option {
 	}
 }
 
-func New(client *rpc.Client, db *mgo.Database, opts ...Option) (*BlockProcessor, error) {
+func New(
+	client *rpc.Client,
+	connect ConnectFunc,
+	db *mgo.Database,
+	opts ...Option,
+) (*BlockProcessor, error) {
 	// Ensure DB indexes exist.
 	indexes := []struct {
 		Key    string
@@ -176,7 +181,9 @@ func New(client *rpc.Client, db *mgo.Database, opts ...Option) (*BlockProcessor,
 	// Start workers.
 	processor.blockCh = make(chan *database.Block, processor.numWorkers)
 	for i := uint(0); i < processor.numWorkers; i++ {
-		processor.t.Go(processor.worker)
+		processor.t.Go(func() error {
+			return processor.worker(connect)
+		})
 	}
 
 	// Return the new BlockProcessor.
@@ -195,7 +202,13 @@ func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
 	return nil
 }
 
-func (processor *BlockProcessor) worker() error {
+func (processor *BlockProcessor) worker(connect ConnectFunc) error {
+	client, err := connect()
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
 	for {
 		select {
 		case block := <-processor.blockCh:
@@ -209,11 +222,11 @@ func (processor *BlockProcessor) worker() error {
 					)
 					switch body := op.Data().(type) {
 					case *types.CommentOperation:
-						content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
+						content, err = client.Database.GetContent(body.Author, body.Permlink)
 						err = errors.Wrapf(err, "block %v: failed to get content: @%v/%v",
 							block.Number, body.Author, body.Permlink)
 					case *types.VoteOperation:
-						content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
+						content, err = client.Database.GetContent(body.Author, body.Permlink)
 						err = errors.Wrapf(err, "block %v: failed to get content: @%v/%v",
 							block.Number, body.Author, body.Permlink)
 					}
