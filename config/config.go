@@ -31,6 +31,8 @@ type Config struct {
 
 	SteemdDisabled           bool   `envconfig:"STEEMD_DISABLED"`
 	SteemdRPCEndpointAddress string `envconfig:"STEEMD_RPC_ENDPOINT_ADDRESS" default:"ws://localhost:8090"`
+
+	BlockProcessorWorkerCount uint `envconfig:"BLOCK_PROCESSOR_WORKER_COUNT" default:"10"`
 }
 
 func Load() (*Config, error) {

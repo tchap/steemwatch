@@ -16,6 +16,8 @@ import (
 	"gopkg.in/tomb.v2"
 )
 
+const DefaultWorkerCount = 10
+
 type BlockProcessorConfig struct {
 	NextBlockNum       uint32     `bson:"nextBlockNum"`
 	LastBlockTimestamp *time.Time `bson:"lastBlockTimestamp,omitempty"`
@@ -33,15 +35,17 @@ func (config *BlockProcessorConfig) Clone() *BlockProcessorConfig {
 }
 
 type BlockProcessor struct {
-	client *rpc.Client
-	db     *mgo.Database
-	config *BlockProcessorConfig
+	client     *rpc.Client
+	db         *mgo.Database
+	config     *BlockProcessorConfig
+	numWorkers uint
 
 	eventMiners         map[types.OpType][]EventMiner
 	additionalNotifiers map[string]Notifier
 
+	blockCh             chan *database.Block
 	blockProcessingLock *sync.Mutex
-	lastBlockCh         chan *database.Block
+	blockAckCh          chan *database.Block
 
 	t *tomb.Tomb
 }
@@ -57,6 +61,12 @@ func AddNotifier(id string, notifier Notifier) Option {
 		} else {
 			processor.additionalNotifiers[id] = notifier
 		}
+	}
+}
+
+func SetWorkerCount(numWorkers uint) Option {
+	return func(processor *BlockProcessor) {
+		processor.numWorkers = numWorkers
 	}
 }
 
@@ -145,13 +155,13 @@ func New(client *rpc.Client, db *mgo.Database, opts ...Option) (*BlockProcessor,
 
 	// Create a new BlockProcessor instance.
 	processor := &BlockProcessor{
-		client:              client,
-		db:                  db,
-		config:              &config,
-		eventMiners:         eventMiners,
-		blockProcessingLock: new(sync.Mutex),
-		lastBlockCh:         make(chan *database.Block, 1),
-		t:                   new(tomb.Tomb),
+		client:      client,
+		db:          db,
+		config:      &config,
+		numWorkers:  DefaultWorkerCount,
+		eventMiners: eventMiners,
+		blockAckCh:  make(chan *database.Block),
+		t:           new(tomb.Tomb),
 	}
 
 	// Apply the options.
@@ -160,7 +170,14 @@ func New(client *rpc.Client, db *mgo.Database, opts ...Option) (*BlockProcessor,
 	}
 
 	// Start the config flusher.
+	processor.blockAckCh = make(chan *database.Block, processor.numWorkers)
 	processor.t.Go(processor.configFlusher)
+
+	// Start workers.
+	processor.blockCh = make(chan *database.Block, processor.numWorkers)
+	for i := uint(0); i < processor.numWorkers; i++ {
+		processor.t.Go(processor.worker)
+	}
 
 	// Return the new BlockProcessor.
 	return processor, nil
@@ -171,56 +188,69 @@ func (processor *BlockProcessor) BlockRange() (from, to uint32) {
 }
 
 func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
-	processor.blockProcessingLock.Lock()
-	defer processor.blockProcessingLock.Unlock()
+	select {
+	case processor.blockCh <- block:
+	case <-processor.t.Dying():
+	}
+	return nil
+}
 
-	for _, tx := range block.Transactions {
-		for _, op := range tx.Operations {
-			// Fetch the associated content in case
-			// this is a content-related operation.
-			var (
-				content *database.Content
-				err     error
-			)
-			switch body := op.Data().(type) {
-			case *types.CommentOperation:
-				content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
-				err = errors.Wrapf(err, "block %v: failed to get content: @%v/%v",
-					block.Number, body.Author, body.Permlink)
-			case *types.VoteOperation:
-				content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
-				err = errors.Wrapf(err, "block %v: failed to get content: @%v/%v",
-					block.Number, body.Author, body.Permlink)
-			}
-			if err != nil {
-				return err
-			}
+func (processor *BlockProcessor) worker() error {
+	for {
+		select {
+		case block := <-processor.blockCh:
+			for _, tx := range block.Transactions {
+				for _, op := range tx.Operations {
+					// Fetch the associated content in case
+					// this is a content-related operation.
+					var (
+						content *database.Content
+						err     error
+					)
+					switch body := op.Data().(type) {
+					case *types.CommentOperation:
+						content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
+						err = errors.Wrapf(err, "block %v: failed to get content: @%v/%v",
+							block.Number, body.Author, body.Permlink)
+					case *types.VoteOperation:
+						content, err = processor.client.Database.GetContent(body.Author, body.Permlink)
+						err = errors.Wrapf(err, "block %v: failed to get content: @%v/%v",
+							block.Number, body.Author, body.Permlink)
+					}
+					if err != nil {
+						return err
+					}
 
-			// Get miners associated with the given operation.
-			miners, ok := processor.eventMiners[op.Type()]
-			if !ok {
-				continue
-			}
-			// Mine events and handle them.
-			for _, eventMiner := range miners {
-				events, err := eventMiner.MineEvent(op, content)
-				if err == nil {
-					for _, event := range events {
-						err = processor.handleEvent(event)
+					// Get miners associated with the given operation.
+					miners, ok := processor.eventMiners[op.Type()]
+					if !ok {
+						continue
+					}
+					// Mine events and handle them.
+					for _, eventMiner := range miners {
+						events, err := eventMiner.MineEvent(op, content)
+						if err == nil {
+							for _, event := range events {
+								err = processor.handleEvent(event)
+								if err != nil {
+									break
+								}
+							}
+						}
 						if err != nil {
-							break
+							return errors.Wrapf(err, "block %v: %v", block.Number, err.Error())
 						}
 					}
 				}
-				if err != nil {
-					return errors.Wrapf(err, "block %v: %v", block.Number, err.Error())
-				}
 			}
+
+			processor.blockAckCh <- block
+
+		case <-processor.t.Dying():
+			processor.blockAckCh <- nil
+			return nil
 		}
 	}
-
-	processor.lastBlockCh <- block
-	return nil
 }
 
 func (processor *BlockProcessor) Finalize() error {
@@ -235,9 +265,31 @@ func (processor *BlockProcessor) Finalize() error {
 
 func (processor *BlockProcessor) configFlusher() error {
 	config := processor.config.Clone()
-	updateConfig := func(lastProcessedBlock *database.Block) {
-		config.NextBlockNum = lastProcessedBlock.Number + 1
-		config.LastBlockTimestamp = lastProcessedBlock.Timestamp.Time
+
+	pendingBlocks := map[uint32]*database.Block{}
+	numAlive := processor.numWorkers
+
+	updateConfig := func(block *database.Block) {
+		// In case this is not the next block, remember it and return.
+		if block.Number != config.NextBlockNum {
+			pendingBlocks[block.Number] = block
+			return
+		}
+
+		// Otherwise increment the next block number.
+		config.NextBlockNum = block.Number + 1
+		config.LastBlockTimestamp = block.Timestamp.Time
+
+		// Process any directly following blocks in the queue.
+		for {
+			next, ok := pendingBlocks[config.NextBlockNum]
+			if !ok {
+				return
+			}
+			config.NextBlockNum = next.Number + 1
+			config.LastBlockTimestamp = next.Timestamp.Time
+			delete(pendingBlocks, config.NextBlockNum)
+		}
 	}
 
 	var timeoutCh <-chan time.Time
@@ -249,8 +301,15 @@ func (processor *BlockProcessor) configFlusher() error {
 	for {
 		select {
 		// Store the last processed block number every time it is received.
-		case block := <-processor.lastBlockCh:
-			updateConfig(block)
+		case block := <-processor.blockAckCh:
+			if block == nil {
+				numAlive--
+				if numAlive == 0 {
+					return processor.flushConfig(config)
+				}
+			} else {
+				updateConfig(block)
+			}
 
 		// Flush config every minute.
 		case <-timeoutCh:
@@ -258,23 +317,6 @@ func (processor *BlockProcessor) configFlusher() error {
 				return err
 			}
 			resetTimeout()
-
-		// Flush the config on exit.
-		case <-processor.t.Dying():
-
-			// Make sure ProcessBlock() is not running any more.
-			processor.blockProcessingLock.Lock()
-			defer processor.blockProcessingLock.Unlock()
-
-			// Check whether there is any additional block number in the queue.
-			select {
-			case block := <-processor.lastBlockCh:
-				updateConfig(block)
-			default:
-			}
-
-			// Flush the config at last.
-			return processor.flushConfig(config)
 		}
 	}
 }
