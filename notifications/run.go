@@ -14,6 +14,8 @@ func Run(
 	db *mgo.Database,
 	opts ...Option,
 ) (*blockfetcher.Context, error) {
+	initNotifiers()
+
 	processor, err := New(client, connect, db, opts...)
 	if err != nil {
 		return nil, err

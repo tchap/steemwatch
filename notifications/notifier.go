@@ -18,7 +18,7 @@ var availableNotifiers = map[string]Notifier{
 }
 
 // XXX: Ugly. Would be better to pass the values directly somehow.
-func init() {
+func initNotifiers() {
 	mustGetenv := func(key string) string {
 		// steemit.chat
 		v := os.Getenv(key)
