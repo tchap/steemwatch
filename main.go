@@ -116,15 +116,15 @@ func runNotifications(
 		return nil, nil, nil
 	}
 
-	// Monitor the connection to steemd.
-	monitorChan := make(chan interface{})
-	go func() {
-		for event := range monitorChan {
-			log.Println("steemd connection:", event)
-		}
-	}()
-
 	connect := func() (*rpc.Client, error) {
+		// Monitor the connection to steemd.
+		monitorChan := make(chan interface{})
+		go func() {
+			for event := range monitorChan {
+				log.Println("steemd connection:", event)
+			}
+		}()
+
 		// Connect to steemd.
 		t, err := websocket.NewTransport(cfg.SteemdRPCEndpointAddress,
 			websocket.SetAutoReconnectEnabled(true),
