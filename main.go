@@ -16,7 +16,7 @@ import (
 	"github.com/go-steem/rpc/transports/websocket"
 	"github.com/pkg/errors"
 	"github.com/steemwatch/blockfetcher"
-	"gopkg.in/mgo.v2"
+	mgo "gopkg.in/mgo.v2"
 )
 
 func main() {
@@ -116,6 +116,15 @@ func runNotifications(
 		return nil, nil, nil
 	}
 
+	var endpointIndex int
+
+	nextEndpoint := func() string {
+		endpoint := cfg.SteemdRPCEndpointAddresses[endpointIndex]
+		endpointIndex++
+		endpointIndex %= len(cfg.SteemdRPCEndpointAddresses)
+		return endpoint
+	}
+
 	connect := func() (*rpc.Client, error) {
 		// Monitor the connection to steemd.
 		monitorChan := make(chan interface{})
@@ -126,13 +135,14 @@ func runNotifications(
 		}()
 
 		// Connect to steemd.
-		t, err := websocket.NewTransport(cfg.SteemdRPCEndpointAddress,
+		endpoint := nextEndpoint()
+		t, err := websocket.NewTransport(endpoint,
 			websocket.SetAutoReconnectEnabled(true),
 			websocket.SetAutoReconnectMaxDelay(1*time.Minute),
 			websocket.SetMonitor(monitorChan))
 		if err != nil {
 			return nil, errors.Wrapf(
-				err, "failed to connect to steemd using %v", cfg.SteemdRPCEndpointAddress)
+				err, "failed to connect to steemd using %v", endpoint)
 		}
 		client, err := rpc.NewClient(t)
 		if err != nil {

@@ -29,8 +29,8 @@ type Config struct {
 
 	MongoURL string `envconfig:"MONGO_URL" default:"localhost"`
 
-	SteemdDisabled           bool   `envconfig:"STEEMD_DISABLED"`
-	SteemdRPCEndpointAddress string `envconfig:"STEEMD_RPC_ENDPOINT_ADDRESS" default:"ws://localhost:8090"`
+	SteemdDisabled             bool     `envconfig:"STEEMD_DISABLED"`
+	SteemdRPCEndpointAddresses []string `envconfig:"STEEMD_RPC_ENDPOINT_ADDRESSES" default:"ws://localhost:8090"`
 
 	BlockProcessorWorkerCount uint `envconfig:"BLOCK_PROCESSOR_WORKER_COUNT" default:"10"`
 }
