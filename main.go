@@ -57,7 +57,7 @@ func _main() error {
 	// Start notifications.
 	notificationsCtx, client, err := runNotifications(nDB, cfg,
 		notifications.SetWorkerCount(cfg.BlockProcessorWorkerCount),
-		notifications.AddNotifier("discord", discord.NewNotifier(dg)),
+		notifications.AddStandardNotifier("discord", discord.NewNotifier(dg)),
 		notifications.AddNotifier("websocket", serverCtx.EventStreamManager))
 	if err != nil {
 		return err

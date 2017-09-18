@@ -64,6 +64,12 @@ func AddNotifier(id string, notifier Notifier) Option {
 	}
 }
 
+func AddStandardNotifier(id string, notifier Notifier) Option {
+	return func(processor *BlockProcessor) {
+		availableNotifiers[id] = notifier
+	}
+}
+
 func SetWorkerCount(numWorkers uint) Option {
 	return func(processor *BlockProcessor) {
 		processor.numWorkers = numWorkers
