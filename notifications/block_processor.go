@@ -203,9 +203,10 @@ func (processor *BlockProcessor) BlockRange() (from, to uint32) {
 func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
 	select {
 	case processor.blockCh <- block:
+		return nil
 	case <-processor.t.Dying():
+		return processor.t.Wait()
 	}
-	return nil
 }
 
 func (processor *BlockProcessor) worker(connect ConnectFunc) error {
