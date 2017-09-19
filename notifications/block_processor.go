@@ -213,7 +213,17 @@ func (processor *BlockProcessor) worker(connect ConnectFunc) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	processor.t.Go(func() error {
+		<-processor.t.Dying()
+		log.Println("Worker connection closed")
+		client.Close()
+		return nil
+	})
+
+	defer func() {
+		log.Println("Worker terminating ...")
+		processor.blockAckCh <- nil
+	}()
 
 	for {
 		select {
@@ -237,6 +247,9 @@ func (processor *BlockProcessor) worker(connect ConnectFunc) error {
 							block.Number, body.Author, body.Permlink)
 					}
 					if err != nil {
+						if !processor.t.Alive() {
+							return nil
+						}
 						return err
 					}
 
@@ -266,7 +279,6 @@ func (processor *BlockProcessor) worker(connect ConnectFunc) error {
 			processor.blockAckCh <- block
 
 		case <-processor.t.Dying():
-			processor.blockAckCh <- nil
 			return nil
 		}
 	}
@@ -276,6 +288,9 @@ func (processor *BlockProcessor) Finalize() error {
 	processor.t.Kill(nil)
 
 	for _, notifier := range availableNotifiers {
+		notifier.Close()
+	}
+	for _, notifier := range processor.additionalNotifiers {
 		notifier.Close()
 	}
 
@@ -324,6 +339,7 @@ func (processor *BlockProcessor) configFlusher() error {
 		case block := <-processor.blockAckCh:
 			if block == nil {
 				numAlive--
+				log.Println("Workers alive: ", numAlive)
 				if numAlive == 0 {
 					return processor.flushConfig(config)
 				}

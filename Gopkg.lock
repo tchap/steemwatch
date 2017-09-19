@@ -22,14 +22,8 @@
 [[projects]]
   name = "github.com/go-steem/rpc"
   packages = [".","apis/database","apis/follow","apis/login","apis/networkbroadcast","encoding/transaction","interfaces","internal/call","internal/rpc","transports/websocket","types"]
-  revision = "79c51815a49384da1e6f5d9e557048f156e2f088"
-  version = "v0.8.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/go-steem/rpc-codec"
-  packages = ["jsonrpc2"]
-  revision = "30a413fc99f7fa9047311d76197fd267a4bb9c79"
+  revision = "f4bba9c8ab5266a801884b2f92c793b7cd83ea6f"
+  version = "v0.9.0"
 
 [[projects]]
   name = "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -159,6 +153,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/sourcegraph/jsonrpc2"
+  packages = [".","websocket"]
+  revision = "c6c7b9aa99fb76ee5460ccd3912ba35d419d493d"
+
+[[projects]]
+  branch = "master"
   name = "github.com/steemwatch/blockfetcher"
   packages = ["."]
   revision = "a0d878d054d52a1b763fa0ae61c2d854099b71c2"
@@ -196,7 +196,7 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["context","context/ctxhttp","websocket"]
+  packages = ["context","context/ctxhttp"]
   revision = "8351a756f30f1297fe94bbf4b767ec589c6ea6d0"
 
 [[projects]]
@@ -238,6 +238,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e64d5b4462b9763866801e8a9e90392eac43b62edfa9848981d5dbd1ed5d5dbf"
+  inputs-digest = "e90664e6972856ca41fadb46a884ccabc34c1968d55841cd0951b6cae58c7974"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -116,15 +116,6 @@ func runNotifications(
 		return nil, nil, nil
 	}
 
-	var endpointIndex int
-
-	nextEndpoint := func() string {
-		endpoint := cfg.SteemdRPCEndpointAddresses[endpointIndex]
-		endpointIndex++
-		endpointIndex %= len(cfg.SteemdRPCEndpointAddresses)
-		return endpoint
-	}
-
 	connect := func() (*rpc.Client, error) {
 		// Monitor the connection to steemd.
 		monitorChan := make(chan interface{})
@@ -135,16 +126,13 @@ func runNotifications(
 		}()
 
 		// Connect to steemd.
-		endpoint := nextEndpoint()
-		t, err := websocket.NewTransport(endpoint,
-			websocket.SetWriteTimeout(5*time.Second),
-			websocket.SetReadTimeout(10*time.Second),
+		t, err := websocket.NewTransport(cfg.SteemdRPCEndpointAddresses,
 			websocket.SetAutoReconnectEnabled(true),
 			websocket.SetAutoReconnectMaxDelay(1*time.Minute),
 			websocket.SetMonitor(monitorChan))
 		if err != nil {
-			return nil, errors.Wrapf(
-				err, "failed to connect to steemd using %v", endpoint)
+			return nil, errors.Wrap(
+				err, "failed to connect initialize WebSocket transport")
 		}
 		client, err := rpc.NewClient(t)
 		if err != nil {
