@@ -22,8 +22,8 @@
 [[projects]]
   name = "github.com/go-steem/rpc"
   packages = [".","apis/database","apis/follow","apis/login","apis/networkbroadcast","encoding/transaction","interfaces","internal/call","internal/rpc","transports/websocket","types"]
-  revision = "f4bba9c8ab5266a801884b2f92c793b7cd83ea6f"
-  version = "v0.9.0"
+  revision = "9758023f0071ef2256d463166f28d460068a7303"
+  version = "v0.10.0"
 
 [[projects]]
   name = "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -238,6 +238,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e90664e6972856ca41fadb46a884ccabc34c1968d55841cd0951b6cae58c7974"
+  inputs-digest = "30500500dc59f2a87f274d2c39d8c5b1c91b08867e446fc46355c7f695da9975"
   solver-name = "gps-cdcl"
   solver-version = 1
