@@ -127,6 +127,9 @@ func runNotifications(
 
 		// Connect to steemd.
 		t, err := websocket.NewTransport(cfg.SteemdRPCEndpointAddresses,
+			websocket.SetDialTimeout(1*time.Minute),
+			websocket.SetWriteTimeout(30*time.Second),
+			websocket.SetReadTimeout(1*time.Minute),
 			websocket.SetAutoReconnectEnabled(true),
 			websocket.SetAutoReconnectMaxDelay(1*time.Minute),
 			websocket.SetMonitor(monitorChan))
