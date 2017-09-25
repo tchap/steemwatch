@@ -210,6 +210,11 @@ func (processor *BlockProcessor) ProcessBlock(block *database.Block) error {
 }
 
 func (processor *BlockProcessor) worker(connect ConnectFunc) error {
+	defer func() {
+		log.Println("Worker terminating ...")
+		processor.blockAckCh <- nil
+	}()
+
 	client, err := connect()
 	if err != nil {
 		return err
@@ -220,11 +225,6 @@ func (processor *BlockProcessor) worker(connect ConnectFunc) error {
 		client.Close()
 		return nil
 	})
-
-	defer func() {
-		log.Println("Worker terminating ...")
-		processor.blockAckCh <- nil
-	}()
 
 	for {
 		select {
